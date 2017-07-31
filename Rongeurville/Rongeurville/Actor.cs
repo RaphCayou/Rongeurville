@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Rongeurville
@@ -6,18 +7,22 @@ namespace Rongeurville
     public abstract class Actor
     {
         protected int rang;
+
         protected Tile currentTile;
+
         //protected Map map;
+        public abstract List<Tile> GetNeighboors(Tile center);
 
         public KeyValuePair<Tile, bool> GetDirectionWithAStar(Tile target)
         {
-            Tile lookingTile;
-            Tile nextLookingTile;
+            AStarTile lookingTile = new AStarTile { CostSoFar = 0, Estimate = GetDistance(target), Value = currentTile };
+            AStarTile nextLookingTile;
             bool pathFind = false;
             bool pathValid = false;
-            List<Tile> openedTiles = new List<Tile>();
+            SortedList<int, AStarTile> openedTiles = new SortedList<int, AStarTile>();
             List<Tile> closedTiles = new List<Tile>();
-            openedTiles.Add(currentTile);
+
+            openedTiles.Add(lookingTile.CostSoFar, lookingTile);
             while (!pathFind)
             {
                 if (!openedTiles.Any())
@@ -31,6 +36,9 @@ namespace Rongeurville
             return new KeyValuePair<Tile, bool>(new Tile(), pathValid);
         }
 
-        public abstract List<Tile> GetNeighboors(Tile center);
+        private double GetDistance(Tile target)
+        {
+            return Math.Sqrt(Math.Pow(currentTile.X - target.X, 2) + Math.Pow(currentTile.Y - target.Y, 2));
+        }
     }
 }
