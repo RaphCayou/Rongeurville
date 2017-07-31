@@ -18,7 +18,7 @@ namespace Rongeurville
             AStarTile lookingTile = new AStarTile { CostSoFar = 0, Estimate = GetDistance(target), Value = currentTile };
             AStarTile nextLookingTile;
             bool pathFind = false;
-            bool pathValid = false;
+            bool pathValid = true;
             SortedList<int, AStarTile> openedTiles = new SortedList<int, AStarTile>();
             List<Tile> closedTiles = new List<Tile>();
 
@@ -30,7 +30,7 @@ namespace Rongeurville
                     pathFind = true;
                     pathValid = false;
                 }
-                //lookingTile = openedTiles.fi
+                lookingTile = openedTiles[0];
             }
 
             return new KeyValuePair<Tile, bool>(new Tile(), pathValid);
