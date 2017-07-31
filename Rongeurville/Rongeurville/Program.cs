@@ -22,7 +22,7 @@ namespace Rongeurville
                 if (comm.Rank == 0)
                 {
                     // program for rank 0
-                    Map map = new Map(comm);
+                    MapManager mapManager = new MapManager(comm);
                     
                 }
                 else // not rank 0

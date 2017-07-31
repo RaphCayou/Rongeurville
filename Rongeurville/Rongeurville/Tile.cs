@@ -34,5 +34,54 @@
                 return (X * 397) ^ Y;
             }
         }
+
+        /// <summary>
+        /// Set Tile content from character
+        /// </summary>
+        /// <param name="charTileContent"></param>
+        public void SetTileContent(char charTileContent)
+        {
+            switch (charTileContent)
+            {
+                case '#':
+                    Content = TileContent.Wall;
+                    break;
+                case 'F':
+                    Content = TileContent.Cheese;
+                    break;
+                case 'C':
+                    Content = TileContent.Cat;
+                    break;
+                case 'R':
+                    Content = TileContent.Rat;
+                    break;
+                default:
+                    Content = TileContent.Empty;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Character associated with the tile content
+        /// </summary>
+        public char FormattedContent
+        {
+            get
+            {
+                switch (Content)
+                {
+                    case TileContent.Wall:
+                        return '#';
+                    case TileContent.Cheese:
+                        return 'F';
+                    case TileContent.Cat:
+                        return 'C';
+                    case TileContent.Rat:
+                        return 'R';
+                    default:
+                        return ' ';
+                }
+            }
+        }
     }
 }
