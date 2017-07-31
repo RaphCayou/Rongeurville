@@ -51,6 +51,7 @@
     <Compile Include="Actor.cs" />
     <Compile Include="AStarTIle.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="Cat.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tile.cs" />
