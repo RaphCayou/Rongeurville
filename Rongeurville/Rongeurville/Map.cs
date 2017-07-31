@@ -13,18 +13,18 @@ namespace Rongeurville
         private int height;
         private int width;
 
-        private Tile[,] tiles;
+        public Tile[,] Tiles { get; private set; }
 
         public List<Tile> Rats { get; }
         public List<Tile> Cats { get; }
-        public List<Tile> Cheeses { get; }
+        public List<Tile> Cheese { get; }
         public List<Tile> Exits { get; }
 
         public Map()
         {
             Rats = new List<Tile>();
             Cats = new List<Tile>();
-            Cheeses = new List<Tile>();
+            Cheese = new List<Tile>();
             Exits = new List<Tile>();
         }
 
@@ -65,12 +65,12 @@ namespace Rongeurville
             parsedMap.height = 1 + Array.FindLastIndex(lines, line => { return line.Contains('#'); });
 
             // Fills the list of tiles with valid instances 
-            parsedMap.tiles = new Tile[parsedMap.height, parsedMap.width];
+            parsedMap.Tiles = new Tile[parsedMap.height, parsedMap.width];
             for (int i = 0; i < parsedMap.height; ++i)
             {
                 for (int j = 0; j < parsedMap.width; ++j)
                 {
-                    parsedMap.tiles[i, j] = new Tile
+                    parsedMap.Tiles[i, j] = new Tile
                     {
                         Y = i,
                         X = j
@@ -79,19 +79,19 @@ namespace Rongeurville
                     if (j < lines[i].Length)
                     {
                         // Parse tile content
-                        parsedMap.tiles[i, j].SetTileContent(lines[i][j]);
+                        parsedMap.Tiles[i, j].SetTileContent(lines[i][j]);
 
                         // If the tile is special, put it in the corresponding list
-                        switch (parsedMap.tiles[i, j].Content)
+                        switch (parsedMap.Tiles[i, j].Content)
                         {
                             case TileContent.Rat:
-                                parsedMap.Rats.Add(parsedMap.tiles[i, j]);
+                                parsedMap.Rats.Add(parsedMap.Tiles[i, j]);
                                 break;
                             case TileContent.Cat:
-                                parsedMap.Cats.Add(parsedMap.tiles[i, j]);
+                                parsedMap.Cats.Add(parsedMap.Tiles[i, j]);
                                 break;
                             case TileContent.Cheese:
-                                parsedMap.Cheeses.Add(parsedMap.tiles[i, j]);
+                                parsedMap.Cheese.Add(parsedMap.Tiles[i, j]);
                                 break;
                         }
                     }
@@ -112,9 +112,9 @@ namespace Rongeurville
         {
             for (int i = 0; i < map.height; ++i)
             {
-                if (map.tiles[i, map.width - 1].Content == TileContent.Empty)
+                if (map.Tiles[i, map.width - 1].Content == TileContent.Empty)
                 {
-                    map.Exits.Add(map.tiles[i, map.width - 1]);
+                    map.Exits.Add(map.Tiles[i, map.width - 1]);
                 }
             }
         }
@@ -127,7 +127,7 @@ namespace Rongeurville
             {
                 for (int j = 0; j < width; ++j)
                 {
-                    sb.Append(tiles[i, j].FormattedContent);
+                    sb.Append(Tiles[i, j].FormattedContent);
                 }
 
                 sb.AppendLine();
