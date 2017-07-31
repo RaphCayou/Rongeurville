@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rongeurville
 {
-    class Map
+    public class Map
     {
         public Map()
         {
