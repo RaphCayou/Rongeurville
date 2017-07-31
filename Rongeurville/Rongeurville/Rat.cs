@@ -11,9 +11,8 @@ namespace Rongeurville
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Cheese, TileContent.Empty };
         private bool shouldDie = false;
-        private bool shouldBeScared = false;
         private int timeSinceLastMeow = 0;
-        private Tile lastMeow;
+        private Tile lastMeowLocation;
         private Intracommunicator comm;
 
         public Rat()
@@ -24,28 +23,32 @@ namespace Rongeurville
 
         private void DoRatThings()
         {
-            // Listen for Meows
-
-
-            List<Tile> objectiveList = shouldBeScared ? map.Exits : map.Cheese;
-            int closestObjectiveDistance = int.MaxValue;
-            Tile closestObjective = null;
-            foreach (var objective in objectiveList)
+            while (!shouldDie)
             {
-                Tuple<Tile, int> aStarResult = GetDirectionWithAStar(objective);
-                if (aStarResult.Item2 == -1) continue;
-                if (aStarResult.Item2 >= closestObjectiveDistance) continue;
-                closestObjectiveDistance = aStarResult.Item2;
-                closestObjective = objective;
-            }
+                // Listen for Meows <= 7 tiles from rat
+                //if meow -> time += 5
+
+                List<Tile> objectiveList = timeSinceLastMeow > 0 ? map.Exits : map.Cheese;
+                int closestObjectiveDistance = int.MaxValue;
+                Tile closestObjective = null;
+                foreach (var objective in objectiveList)
+                {
+                    Tuple<Tile, int> aStarResult = GetDirectionWithAStar(objective);
+                    if (aStarResult.Item2 == -1) continue;
+                    if (aStarResult.Item2 >= closestObjectiveDistance) continue;
+                    closestObjectiveDistance = aStarResult.Item2;
+                    closestObjective = objective;
+                }
 
 
-            // MOVE
+                // Communicate intent with map
 
 
-            if (timeSinceLastMeow > 0)
-            {
-                timeSinceLastMeow -= 1;
+                // Be less scared
+                if (timeSinceLastMeow > 0)
+                {
+                    timeSinceLastMeow -= 1;
+                }
             }
             throw new NotImplementedException();
         }
