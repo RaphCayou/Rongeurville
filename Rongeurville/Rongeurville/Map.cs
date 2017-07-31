@@ -9,6 +9,11 @@ namespace Rongeurville
 {
     public class Map
     {
+        public List<Tile> Rats { get; private set; }
+        public List<Tile> Cats { get; private set; }
+        public List<Tile> Cheese { get; private set; }
+        public List<Tile> Exits { get; private set; }
+
         public Map(Intracommunicator comm)
         {
             Console.WriteLine("Map constructed.");
