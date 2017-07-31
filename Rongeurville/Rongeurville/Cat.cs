@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MPI;
 
 namespace Rongeurville
 {
-    public class Cat:Actor
+    public class Cat : Actor
     {
+        private static readonly TileContent[] GO_THROUGH = { TileContent.Rat, TileContent.Empty };
         private bool ShouldDie { get; set; } = false;
         private Intracommunicator comm;
 
@@ -39,7 +41,8 @@ namespace Rongeurville
                 }
                 // Communicate intent with map
                 if (closestRat != null)
-                {;
+                {
+                    ;
                     string response;
                     comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
                     // TODO Move according to response, Die if necessary
@@ -51,13 +54,28 @@ namespace Rongeurville
         {
             List<Tile> neighbors = new List<Tile>();
             // UP
-            
+            if (center.Y - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y - 1, center.X]);
+            }
             // DOWN
+            if (center.Y + 1 < map.Height && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y + 1, center.X]);
+            }
 
             // LEFT
+            if (center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y, center.X - 1].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y, center.X - 1]);
+            }
 
             // RIGHT
-            throw new NotImplementedException();
+            if (center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y, center.X + 1].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y, center.X + 1]);
+            }
+            return neighbors;
         }
     }
 }

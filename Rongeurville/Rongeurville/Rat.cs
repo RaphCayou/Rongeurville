@@ -7,8 +7,9 @@ using MPI;
 
 namespace Rongeurville
 {
-    public class Rat:Actor
+    public class Rat : Actor
     {
+        private static readonly TileContent[] GO_THROUGH = { TileContent.Cheese, TileContent.Empty };
         private bool shouldDie = false;
         private bool shouldBeScared = false;
         private int timeSinceLastMeow = 0;
@@ -51,7 +52,30 @@ namespace Rongeurville
 
         public override List<Tile> GetNeighboors(Tile center)
         {
-            throw new NotImplementedException();
+            List<Tile> neighbors = new List<Tile>();
+            // UP
+            if (center.Y - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y - 1, center.X]);
+            }
+            // DOWN
+            if (center.Y + 1 < map.Height && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y + 1, center.X]);
+            }
+
+            // LEFT
+            if (center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y, center.X - 1].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y, center.X - 1]);
+            }
+
+            // RIGHT
+            if (center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y, center.X + 1].Content))
+            {
+                neighbors.Add(map.Tiles[center.Y, center.X + 1]);
+            }
+            return neighbors;
         }
     }
 }

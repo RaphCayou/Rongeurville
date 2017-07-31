@@ -10,8 +10,8 @@ namespace Rongeurville
 {
     public class Map
     {
-        private int height;
-        private int width;
+        public int Height { get; private set; }
+        public int Width { get; private set; }
 
         public Tile[,] Tiles { get; private set; }
 
@@ -49,7 +49,7 @@ namespace Rongeurville
 
             string[] lines = mapContent.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.None);
 
-            // find farthest # on a line to find map width
+            // find farthest # on a line to find map Width
             int biggestIndex = 0;
             foreach (string line in lines)
             {
@@ -59,16 +59,16 @@ namespace Rongeurville
                     biggestIndex = lastMapDelimiter;
                 }
             }
-            parsedMap.width = 1 + biggestIndex;
+            parsedMap.Width = 1 + biggestIndex;
 
-            // Find lowest line containing a # to find map height
-            parsedMap.height = 1 + Array.FindLastIndex(lines, line => { return line.Contains('#'); });
+            // Find lowest line containing a # to find map Height
+            parsedMap.Height = 1 + Array.FindLastIndex(lines, line => { return line.Contains('#'); });
 
             // Fills the list of tiles with valid instances 
-            parsedMap.Tiles = new Tile[parsedMap.height, parsedMap.width];
-            for (int i = 0; i < parsedMap.height; ++i)
+            parsedMap.Tiles = new Tile[parsedMap.Height, parsedMap.Width];
+            for (int i = 0; i < parsedMap.Height; ++i)
             {
-                for (int j = 0; j < parsedMap.width; ++j)
+                for (int j = 0; j < parsedMap.Width; ++j)
                 {
                     parsedMap.Tiles[i, j] = new Tile
                     {
@@ -110,11 +110,11 @@ namespace Rongeurville
         /// <param name="map"></param>
         public static void FindExits(ref Map map)
         {
-            for (int i = 0; i < map.height; ++i)
+            for (int i = 0; i < map.Height; ++i)
             {
-                if (map.Tiles[i, map.width - 1].Content == TileContent.Empty)
+                if (map.Tiles[i, map.Width - 1].Content == TileContent.Empty)
                 {
-                    map.Exits.Add(map.Tiles[i, map.width - 1]);
+                    map.Exits.Add(map.Tiles[i, map.Width - 1]);
                 }
             }
         }
@@ -123,9 +123,9 @@ namespace Rongeurville
         {
             StringBuilder sb = new StringBuilder();
             
-            for (int i = 0; i < height; ++i)
+            for (int i = 0; i < Height; ++i)
             {
-                for (int j = 0; j < width; ++j)
+                for (int j = 0; j < Width; ++j)
                 {
                     sb.Append(Tiles[i, j].FormattedContent);
                 }
