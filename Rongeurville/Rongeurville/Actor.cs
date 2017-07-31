@@ -28,7 +28,7 @@ namespace Rongeurville
                 //lookingTile = openedTiles.fi
             }
 
-            return new Tile();
+            return new KeyValuePair<Tile, bool>(new Tile(), pathValid);
         }
 
         public abstract List<Tile> GetNeighboors(Tile center);
