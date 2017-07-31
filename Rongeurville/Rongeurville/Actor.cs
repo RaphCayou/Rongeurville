@@ -10,17 +10,17 @@ namespace Rongeurville
 
         protected Tile currentTile;
 
-        //protected Map map;
+        protected Map map;
         public abstract List<Tile> GetNeighboors(Tile center);
 
-        public KeyValuePair<Tile, bool> GetDirectionWithAStar(Tile target)
+        public Tuple<Tile, int> GetDirectionWithAStar(Tile target)
         {
             AStarTile lookingTile = new AStarTile { CostSoFar = 0, Estimate = GetDistance(target), Value = currentTile };
             AStarTile nextLookingTile;
             bool pathFind = false;
-            bool pathValid = true;
+            int pathCost = -1;
             SortedList<int, AStarTile> openedTiles = new SortedList<int, AStarTile>();
-            List<Tile> closedTiles = new List<Tile>();
+            List<AStarTile> closedTiles = new List<AStarTile>();
 
             openedTiles.Add(lookingTile.CostSoFar, lookingTile);
             while (!pathFind)
@@ -28,12 +28,34 @@ namespace Rongeurville
                 if (!openedTiles.Any())
                 {
                     pathFind = true;
-                    pathValid = false;
+                    pathCost = -1;
                 }
                 lookingTile = openedTiles[0];
+                openedTiles.RemoveAt(0);
+                if (lookingTile.Value == target)
+                {
+                    pathFind = true;
+                    pathCost = lookingTile.CostSoFar;
+                }
+                closedTiles.Add(lookingTile);
+                foreach (Tile tile in GetNeighboors(lookingTile.Value))
+                {
+                    AStarTile neighboor = new AStarTile
+                    {
+                        CostSoFar = lookingTile.CostSoFar + 1,
+                        Estimate = GetDistance(tile),
+                        Value = tile,
+                        Parent = lookingTile
+                    };
+                    KeyValuePair<int, AStarTile> inOpened = openedTiles.First(pair => pair.Value.Value == neighboor.Value && pair.Value.CostSoFar >= neighboor.CostSoFar);
+                    //if (inOpened)
+                    //{
+                        
+                    //}
+                }
             }
 
-            return new KeyValuePair<Tile, bool>(new Tile(), pathValid);
+            return new Tuple<Tile, int>(new Tile(), pathCost);
         }
 
         private double GetDistance(Tile target)

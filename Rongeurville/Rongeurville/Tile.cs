@@ -13,5 +13,6 @@
         public int X;
         public int Y;
         public TileContent Content;
+        //TODO implement ==
     }
 }
