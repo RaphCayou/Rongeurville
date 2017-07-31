@@ -6,6 +6,7 @@ namespace Rongeurville
 {
     public abstract class Actor
     {
+        protected const int NO_PATH = -1;
         protected int rang;
 
         protected Tile currentTile;
@@ -13,26 +14,31 @@ namespace Rongeurville
         protected Map map;
         public abstract List<Tile> GetNeighboors(Tile center);
 
+        /// <summary>
+        /// TODO tester que tout est ok.
+        /// </summary>
+        /// <param name="target">Targeted tile.</param>
+        /// <returns>Next to tile to go on.</returns>
         public Tuple<Tile, int> GetDirectionWithAStar(Tile target)
         {
             AStarTile lookingTile = new AStarTile { CostSoFar = 0, Estimate = GetDistance(target), Value = currentTile };
-            AStarTile nextLookingTile;
             bool pathFind = false;
             int pathCost = -1;
-            SortedList<int, AStarTile> openedTiles = new SortedList<int, AStarTile>();
+            List<AStarTile> openedTiles = new List<AStarTile>();
             List<AStarTile> closedTiles = new List<AStarTile>();
 
-            openedTiles.Add(lookingTile.CostSoFar, lookingTile);
+            openedTiles.Add(lookingTile);
             while (!pathFind)
             {
                 if (!openedTiles.Any())
                 {
                     pathFind = true;
-                    pathCost = -1;
+                    pathCost = NO_PATH;
                 }
+                openedTiles.Sort((tile1, tile2) => tile1.TotalCost().CompareTo(tile2.TotalCost()));
                 lookingTile = openedTiles[0];
                 openedTiles.RemoveAt(0);
-                if (lookingTile.Value == target)
+                if (Equals(lookingTile.Value, target))
                 {
                     pathFind = true;
                     pathCost = lookingTile.CostSoFar;
@@ -47,15 +53,39 @@ namespace Rongeurville
                         Value = tile,
                         Parent = lookingTile
                     };
-                    KeyValuePair<int, AStarTile> inOpened = openedTiles.First(pair => pair.Value.Value == neighboor.Value && pair.Value.CostSoFar >= neighboor.CostSoFar);
-                    //if (inOpened)
-                    //{
-                        
-                    //}
+                    foreach (List<AStarTile> aStarTiles in new[] { openedTiles, closedTiles })
+                    {
+                        AStarTile inOpened =
+                            aStarTiles.FirstOrDefault(
+                                openTile => Equals(openTile.Value, neighboor.Value) &&
+                                            openTile.CostSoFar >= neighboor.CostSoFar);
+                        if (inOpened != null)
+                        {
+                            aStarTiles.Remove(inOpened);
+                            openedTiles.Add(neighboor);
+                        }
+                    }
+                    if (!openedTiles.Contains(neighboor) && !closedTiles.Contains(neighboor))
+                    {
+                        openedTiles.Add(neighboor);
+                    }
                 }
             }
+            Tile tileToGo;
+            if (pathCost != NO_PATH)
+            {
+                tileToGo = currentTile;
+                while (lookingTile.Parent != null)
+                {
+                    tileToGo = lookingTile.Value;
+                }
+            }
+            else
+            {
+                tileToGo = new Tile();
+            }
 
-            return new Tuple<Tile, int>(new Tile(), pathCost);
+            return new Tuple<Tile, int>(tileToGo, pathCost);
         }
 
         private double GetDistance(Tile target)
