@@ -51,22 +51,6 @@ namespace Rongeurville
 
         public override List<Tile> GetNeighboors(Tile center)
         {
-            // UP
-
-            // UP RIGHT
-
-            // RIGHT
-
-            // DOWN RIGHT
-
-            // DOWN
-
-            // DOWN LEFT
-
-            // LEFT
-
-            // UP LEFT
-
             throw new NotImplementedException();
         }
     }
