@@ -28,6 +28,23 @@ namespace Rongeurville
             Exits = new List<Tile>();
         }
 
+        public bool ValidateDestinationTile(Actor actor, Tile destination)
+        {
+            if (destination.Content == TileContent.Wall)
+            {
+                return false; // Cannot move on a wall
+            }
+
+            if (destination.Content == actor.GetTileContent())
+            {
+                return false; // Cannot move to a tile with another actor of the same type as us
+            }
+
+            // Is tile is in map, consider it valid
+            return 0 <= destination.Y && destination.Y < height
+                && 0 <= destination.X && destination.X < width;
+        }
+
         /// <summary>
         /// Load a file and parse its content to create a map from it.
         /// </summary>

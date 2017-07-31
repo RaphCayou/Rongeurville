@@ -101,5 +101,10 @@ namespace Rongeurville
             }
             return neighbors;
         }
+
+        public override TileContent GetTileContent()
+        {
+            return TileContent.Rat;
+        }
     }
 }

@@ -14,6 +14,8 @@ namespace Rongeurville
         protected Map map;
         public abstract List<Tile> GetNeighboors(Tile center);
 
+        public abstract TileContent GetTileContent();
+
         /// <summary>
         /// TODO tester que tout est ok.
         /// </summary>
