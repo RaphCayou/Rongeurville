@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actor.cs" />
+    <Compile Include="Coordinates.cs" />
     <Compile Include="PathTile.cs" />
     <Compile Include="Communication\DeathConfirmation.cs" />
     <Compile Include="Communication\Message.cs" />
