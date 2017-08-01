@@ -8,7 +8,7 @@ namespace Rongeurville
     public abstract class Actor
     {
         protected const int NO_PATH = -1;
-        protected int rang;
+        protected int rank;
 
         protected Tile currentTile;
 
@@ -22,10 +22,16 @@ namespace Rongeurville
 
         public abstract TileContent GetTileContent();
 
-        protected Actor()
+        protected Actor(Intracommunicator communicator)
         {
-            comm = Communicator.world;
-            DoYourThings();
+            comm = communicator;
+            rank = comm.Rank;
+        }
+
+        public void Start()
+        {
+            //TODO reveive la map et le start location et le signal de debut de partie
+            DoThing();
         }
 
         /// <summary>
@@ -111,6 +117,7 @@ namespace Rongeurville
             while (!shouldDie)
             {
                 DoYourThings();
+                //TODO update avec tout les mises à jours de la carte(tant que notre position est pas update)
             }
         }
     }

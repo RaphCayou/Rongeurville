@@ -9,7 +9,7 @@ namespace Rongeurville
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Rat, TileContent.Empty };
 
-        public Cat() : base()
+        public Cat(Intracommunicator communicator) : base(communicator)
         {
         }
 

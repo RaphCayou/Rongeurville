@@ -13,7 +13,7 @@ namespace Rongeurville
         private int timeSinceLastMeow = 0;
         private Tile lastMeowLocation;
 
-        public Rat() : base()
+        public Rat(Intracommunicator communicator) : base(communicator)
         {
         }
 
