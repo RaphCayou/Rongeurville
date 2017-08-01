@@ -25,24 +25,11 @@ namespace Rongeurville
         {
             while (!shouldDie)
             {
-                // Listen for Meows <= 7 tiles from rat
+                // TODO Listen for Meows <= 7 tiles from rat
                 //if meow -> time += 5
+                Tuple<Tile, int> aStarResult = GetDirection();
 
-                List<Tile> objectiveList = timeSinceLastMeow > 0 ? map.Exits : map.Cheese;
-                int closestObjectiveDistance = int.MaxValue;
-                Tile closestObjective = null;
-                foreach (var objective in objectiveList)
-                {
-                    Tuple<Tile, int> aStarResult = GetDirectionWithAStar(objective);
-                    if (aStarResult.Item2 == -1) continue;
-                    if (aStarResult.Item2 >= closestObjectiveDistance) continue;
-                    closestObjectiveDistance = aStarResult.Item2;
-                    closestObjective = objective;
-                }
-
-
-                // Communicate intent with map
-
+                // TODO Communicate intent with map
 
                 // Be less scared
                 if (timeSinceLastMeow > 0)
@@ -100,6 +87,11 @@ namespace Rongeurville
                 neighbors.Add(map.Tiles[center.Y, center.X + 1]);
             }
             return neighbors;
+        }
+
+        public override bool IsGoal(Tile target)
+        {
+            return timeSinceLastMeow > 0 ? map.Exits.Contains(target) : TileContent.Cheese == target.Content;
         }
 
         public override TileContent GetTileContent()

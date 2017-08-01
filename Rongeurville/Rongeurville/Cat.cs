@@ -23,30 +23,16 @@ namespace Rongeurville
             while (!ShouldDie)
             {
                 // Get closest rat
-                int closestRatDistance = int.MaxValue;
-                Tile closestRat = null;
-                List<Tile> rats = map.Rats;
-                foreach (var rat in rats)
-                {
-                    Tuple<Tile, int> aStarResult = GetDirectionWithAStar(rat);
-                    if (aStarResult.Item2 == -1) continue;
-                    if (aStarResult.Item2 >= closestRatDistance) continue;
-                    closestRatDistance = aStarResult.Item2;
-                    closestRat = rat;
-                }
+                Tuple<Tile, int> aStarResult = GetDirection();
                 // MEOW
-                if (closestRatDistance <= 10)
+                if (aStarResult.Item2 <= 10)
                 {
                     var request = comm.ImmediateSend("MEOW", 0, 0);
                 }
                 // Communicate intent with map
-                if (closestRat != null)
-                {
-                    ;
-                    string response;
-                    comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
-                    // TODO Move according to response, Die if necessary
-                }
+                string response;
+                comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
+                // TODO Move according to response, Die if necessary
             }
         }
 
@@ -76,6 +62,11 @@ namespace Rongeurville
                 neighbors.Add(map.Tiles[center.Y, center.X + 1]);
             }
             return neighbors;
+        }
+
+        public override bool IsGoal(Tile target)
+        {
+            return target.Content == TileContent.Rat;
         }
 
         public override TileContent GetTileContent()

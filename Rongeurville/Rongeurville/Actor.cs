@@ -13,21 +13,21 @@ namespace Rongeurville
 
         protected Map map;
         public abstract List<Tile> GetNeighboors(Tile center);
+        public abstract bool IsGoal(Tile target);
 
         public abstract TileContent GetTileContent();
 
         /// <summary>
-        /// TODO tester que tout est ok.
+        /// Find the closest objective to go on.
         /// </summary>
-        /// <param name="target">Targeted tile.</param>
-        /// <returns>Next to tile to go on.</returns>
-        public Tuple<Tile, int> GetDirectionWithAStar(Tile target)
+        /// <returns>Next to tile to go on and the cost to go on that tile.</returns>
+        public Tuple<Tile, int> GetDirection()
         {
-            AStarTile lookingTile = new AStarTile { CostSoFar = 0, Estimate = GetDistance(target), Value = currentTile };
+            PathTile lookingTile = new PathTile { CostSoFar = 0, Estimate = GetEstimate(currentTile), Value = currentTile };
             bool pathFind = false;
             int pathCost = -1;
-            List<AStarTile> openedTiles = new List<AStarTile>();
-            List<AStarTile> closedTiles = new List<AStarTile>();
+            List<PathTile> openedTiles = new List<PathTile>();
+            List<PathTile> closedTiles = new List<PathTile>();
 
             openedTiles.Add(lookingTile);
             while (!pathFind)
@@ -40,7 +40,7 @@ namespace Rongeurville
                 openedTiles.Sort((tile1, tile2) => tile1.TotalCost().CompareTo(tile2.TotalCost()));
                 lookingTile = openedTiles[0];
                 openedTiles.RemoveAt(0);
-                if (Equals(lookingTile.Value, target))
+                if (IsGoal(lookingTile.Value))
                 {
                     pathFind = true;
                     pathCost = lookingTile.CostSoFar;
@@ -48,16 +48,16 @@ namespace Rongeurville
                 closedTiles.Add(lookingTile);
                 foreach (Tile tile in GetNeighboors(lookingTile.Value))
                 {
-                    AStarTile neighboor = new AStarTile
+                    PathTile neighboor = new PathTile
                     {
                         CostSoFar = lookingTile.CostSoFar + 1,
-                        Estimate = GetDistance(tile),
+                        Estimate = GetEstimate(tile),
                         Value = tile,
                         Parent = lookingTile
                     };
-                    foreach (List<AStarTile> aStarTiles in new[] { openedTiles, closedTiles })
+                    foreach (List<PathTile> aStarTiles in new[] { openedTiles, closedTiles })
                     {
-                        AStarTile inOpened =
+                        PathTile inOpened =
                             aStarTiles.FirstOrDefault(
                                 openTile => Equals(openTile.Value, neighboor.Value) &&
                                             openTile.CostSoFar >= neighboor.CostSoFar);
@@ -90,9 +90,9 @@ namespace Rongeurville
             return new Tuple<Tile, int>(tileToGo, pathCost);
         }
 
-        private double GetDistance(Tile target)
+        private double GetEstimate(Tile target)
         {
-            return Math.Sqrt(Math.Pow(currentTile.X - target.X, 2) + Math.Pow(currentTile.Y - target.Y, 2));
+            return IsGoal(target)? 0 : 1;
         }
     }
 }

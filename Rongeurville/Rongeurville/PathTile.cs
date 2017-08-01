@@ -2,16 +2,16 @@
 
 namespace Rongeurville
 {
-    public class AStarTile
+    public class PathTile
     {
         public int CostSoFar;
         public double Estimate;
         public Tile Value;
-        public AStarTile Parent;
+        public PathTile Parent;
 
-        private sealed class ValueEqualityComparer : IEqualityComparer<AStarTile>
+        private sealed class ValueEqualityComparer : IEqualityComparer<PathTile>
         {
-            public bool Equals(AStarTile x, AStarTile y)
+            public bool Equals(PathTile x, PathTile y)
             {
                 if (ReferenceEquals(x, y)) return true;
                 if (ReferenceEquals(x, null)) return false;
@@ -20,13 +20,13 @@ namespace Rongeurville
                 return Equals(x.Value, y.Value);
             }
 
-            public int GetHashCode(AStarTile obj)
+            public int GetHashCode(PathTile obj)
             {
                 return (obj.Value != null ? obj.Value.GetHashCode() : 0);
             }
         }
 
-        public static IEqualityComparer<AStarTile> ValueComparer { get; } = new ValueEqualityComparer();
+        public static IEqualityComparer<PathTile> ValueComparer { get; } = new ValueEqualityComparer();
 
         /// <summary>
         /// Calculating the cost so far with the estimate.
