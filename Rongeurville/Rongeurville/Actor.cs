@@ -46,7 +46,7 @@ namespace Rongeurville
         }
 
         /// <summary>
-        /// Find the closest objective to go on. A* Pathfinding
+        /// Find the closest objective to go on. Dijkstra Pathfinding
         /// </summary>
         /// <returns>Next to tile to go on and the cost to go on that tile. Postion is null and cost is equal to NO_COST if path find.</returns>
         public Tuple<Coordinates, int> GetDirection()
