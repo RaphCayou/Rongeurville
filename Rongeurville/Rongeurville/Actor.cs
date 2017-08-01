@@ -41,8 +41,8 @@ namespace Rongeurville
         /// <summary>
         /// Find the closest objective to go on.
         /// </summary>
-        /// <returns>Next to tile to go on and the cost to go on that tile.</returns>
-        public Tuple<Tile, int> GetDirection()
+        /// <returns>Next to tile to go on and the cost to go on that tile. Postion is null and cost is equal to NO_COST if path find.</returns>
+        public Tuple<Coordinates, int> GetDirection()
         {
             PathTile lookingTile =
                 new PathTile { CostSoFar = 0, Estimate = GetEstimate(currentTile), Value = currentTile };
@@ -77,15 +77,15 @@ namespace Rongeurville
                         Value = tile,
                         Parent = lookingTile
                     };
-                    foreach (List<PathTile> aStarTiles in new[] { openedTiles, closedTiles })
+                    foreach (List<PathTile> pathTiles in new[] { openedTiles, closedTiles })
                     {
-                        PathTile inOpened =
-                            aStarTiles.FirstOrDefault(
+                        PathTile inPathTile =
+                            pathTiles.FirstOrDefault(
                                 openTile => Equals(openTile.Value, neighbor.Value) &&
                                             openTile.CostSoFar >= neighbor.CostSoFar);
-                        if (inOpened != null)
+                        if (inPathTile != null)
                         {
-                            aStarTiles.Remove(inOpened);
+                            pathTiles.Remove(inPathTile);
                             openedTiles.Add(neighbor);
                         }
                     }
@@ -95,7 +95,7 @@ namespace Rongeurville
                     }
                 }
             }
-            Tile tileToGo;
+            Tile tileToGo = null;
             if (pathCost != NO_PATH)
             {
                 tileToGo = currentTile;
@@ -104,12 +104,8 @@ namespace Rongeurville
                     tileToGo = lookingTile.Value;
                 }
             }
-            else
-            {
-                tileToGo = new Tile();
-            }
 
-            return new Tuple<Tile, int>(tileToGo, pathCost);
+            return new Tuple<Coordinates, int>(tileToGo?.Position, pathCost);
         }
 
         private double GetEstimate(Tile target)
@@ -121,10 +117,12 @@ namespace Rongeurville
         {
             while (!shouldDie)
             {
-
-                Tuple<Tile, int> searchResult = GetDirection();
+                Tuple<Coordinates, int> searchResult = GetDirection();
                 MoveEvent(searchResult.Item2);
-                comm.ImmediateSend(new MoveRequest { Rank = rank, DesiredTile = searchResult.Item1.Position }, 0, 0);
+                Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
+                    ? currentTile.Position
+                    : searchResult.Item1; 
+                comm.ImmediateSend(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {
