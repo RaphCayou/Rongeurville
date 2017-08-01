@@ -57,6 +57,22 @@ namespace Rongeurville
                 IsDeadProcess = false,
                 Position = t.Position
             }).ToArray();
+
+
+            Logger l = new Logger(rank =>
+            {
+                if (rank == 0)
+                    return ProcessType.Map;
+                if (rank <= numberOfRats)
+                    return ProcessType.Rat;
+                return ProcessType.Cat;
+            });
+            l.LogMap(map.ToString());
+            l.LogCheeseConsumption(3, new Coordinates());
+            l.LogMove(1, true);
+            l.LogMove(1, false);
+            l.LogMove(2, true);
+            l.LogExecutionTime(1234);
         }
 
         public void Start()

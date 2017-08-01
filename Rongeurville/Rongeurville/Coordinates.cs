@@ -18,7 +18,7 @@ namespace Rongeurville
 
         public override string ToString()
         {
-            return string.Format("({X},{Y})");
+            return $"({X},{Y})";
         }
     }
 }
