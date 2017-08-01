@@ -1,6 +1,9 @@
-﻿namespace Rongeurville.Communication
+﻿using System;
+
+namespace Rongeurville.Communication
 {
-    public class KillSignal : ISignal
+    [Serializable]
+    public class KillSignal : Signal
     {
     }
 }

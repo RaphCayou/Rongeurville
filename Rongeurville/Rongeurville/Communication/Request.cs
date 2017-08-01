@@ -1,6 +1,9 @@
-﻿namespace Rongeurville.Communication
+﻿using System;
+
+namespace Rongeurville.Communication
 {
-    public abstract class Request : IMessage
+    [Serializable]
+    public abstract class Request : Message
     {
         public int Rank;
     }

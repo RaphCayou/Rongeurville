@@ -51,8 +51,8 @@
     <Compile Include="Actor.cs" />
     <Compile Include="PathTile.cs" />
     <Compile Include="Communication\DeathConfirmation.cs" />
-    <Compile Include="Communication\IMessage.cs" />
-    <Compile Include="Communication\ISignal.cs" />
+    <Compile Include="Communication\Message.cs" />
+    <Compile Include="Communication\Signal.cs" />
     <Compile Include="Communication\KillSignal.cs" />
     <Compile Include="Communication\MeowRequest.cs" />
     <Compile Include="Communication\MeowSignal.cs" />

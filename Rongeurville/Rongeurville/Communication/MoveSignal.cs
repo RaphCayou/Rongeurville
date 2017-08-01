@@ -1,6 +1,9 @@
-﻿namespace Rongeurville.Communication
+﻿using System;
+
+namespace Rongeurville.Communication
 {
-    public class MoveSignal : ISignal
+    [Serializable]
+    public class MoveSignal : Signal
     {
         public Tile InitialTile;
         public Tile FinalTile;

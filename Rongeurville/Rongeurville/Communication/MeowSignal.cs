@@ -1,6 +1,9 @@
-﻿namespace Rongeurville.Communication
+﻿using System;
+
+namespace Rongeurville.Communication
 {
-    public class MeowSignal : ISignal
+    [Serializable]
+    public class MeowSignal : Signal
     {
         public Tile MeowLocation;
     }

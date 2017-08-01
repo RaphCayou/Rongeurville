@@ -3,8 +3,7 @@
 namespace Rongeurville.Communication
 {
     [Serializable]
-    public class MoveRequest : Request
+    public abstract class Signal : Message
     {
-        public Tile DesiredTile;
     }
 }

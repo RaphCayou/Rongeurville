@@ -1,6 +1,9 @@
-﻿namespace Rongeurville.Communication
+﻿using System;
+
+namespace Rongeurville.Communication
 {
-    public class StartSignal : ISignal
+    [Serializable]
+    public class StartSignal : Signal
     {
         public Map Map;
     }

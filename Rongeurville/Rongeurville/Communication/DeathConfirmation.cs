@@ -1,5 +1,8 @@
-﻿namespace Rongeurville.Communication
+﻿using System;
+
+namespace Rongeurville.Communication
 {
+    [Serializable]
     public class DeathConfirmation : Request
     {
     }
