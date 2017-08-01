@@ -9,17 +9,6 @@
         Rat,
     }
 
-    public class Coordinates
-    {
-        public int X;
-        public int Y;
-
-        protected bool Equals(Coordinates other)
-        {
-            return X == other.X && Y == other.Y;
-        }
-    }
-
     public class Tile
     {
         public Coordinates Position;
