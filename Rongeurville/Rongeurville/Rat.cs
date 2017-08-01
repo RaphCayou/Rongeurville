@@ -33,7 +33,7 @@ namespace Rongeurville
             throw new NotImplementedException();
         }
 
-        public override List<Tile> GetNeighboors(Tile center)
+        public override List<Tile> GetNeighbors(Tile center)
         {
             List<Tile> neighbors = new List<Tile>();
             // UP

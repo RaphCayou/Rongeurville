@@ -28,7 +28,7 @@ namespace Rongeurville
             // TODO Move according to response, Die if necessary
         }
 
-        public override List<Tile> GetNeighboors(Tile center)
+        public override List<Tile> GetNeighbors(Tile center)
         {
             List<Tile> neighbors = new List<Tile>();
             // UP

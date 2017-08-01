@@ -16,7 +16,7 @@ namespace Rongeurville
         protected Intracommunicator comm;
         protected bool shouldDie = false;
 
-        public abstract List<Tile> GetNeighboors(Tile center);
+        public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool IsGoal(Tile target);
         protected abstract void DoYourThings();
 
@@ -63,9 +63,9 @@ namespace Rongeurville
                     pathCost = lookingTile.CostSoFar;
                 }
                 closedTiles.Add(lookingTile);
-                foreach (Tile tile in GetNeighboors(lookingTile.Value))
+                foreach (Tile tile in GetNeighbors(lookingTile.Value))
                 {
-                    PathTile neighboor = new PathTile
+                    PathTile neighbor = new PathTile
                     {
                         CostSoFar = lookingTile.CostSoFar + 1,
                         Estimate = GetEstimate(tile),
@@ -76,17 +76,17 @@ namespace Rongeurville
                     {
                         PathTile inOpened =
                             aStarTiles.FirstOrDefault(
-                                openTile => Equals(openTile.Value, neighboor.Value) &&
-                                            openTile.CostSoFar >= neighboor.CostSoFar);
+                                openTile => Equals(openTile.Value, neighbor.Value) &&
+                                            openTile.CostSoFar >= neighbor.CostSoFar);
                         if (inOpened != null)
                         {
                             aStarTiles.Remove(inOpened);
-                            openedTiles.Add(neighboor);
+                            openedTiles.Add(neighbor);
                         }
                     }
-                    if (!openedTiles.Contains(neighboor) && !closedTiles.Contains(neighboor))
+                    if (!openedTiles.Contains(neighbor) && !closedTiles.Contains(neighbor))
                     {
-                        openedTiles.Add(neighboor);
+                        openedTiles.Add(neighbor);
                     }
                 }
             }
