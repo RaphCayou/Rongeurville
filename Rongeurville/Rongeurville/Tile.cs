@@ -26,26 +26,14 @@
         public TileContent Content;
 
         public int X {
-            get
-            {
-                return Position.X;
-            }
-            set
-            {
-                Position.X = value;
-            }
+            get => Position.X;
+            set => Position.X = value;
         }
 
         public int Y
         {
-            get
-            {
-                return Position.Y;
-            }
-            set
-            {
-                Position.Y = value;
-            }
+            get => Position.Y;
+            set => Position.Y = value;
         }
 
         protected bool Equals(Tile other)
