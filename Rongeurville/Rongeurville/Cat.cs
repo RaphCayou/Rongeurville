@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MPI;
 using Rongeurville.Communication;
@@ -10,10 +9,18 @@ namespace Rongeurville
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Rat, TileContent.Empty };
 
+        /// <summary>
+        /// Constructor for Cat actor
+        /// </summary>
+        /// <param name="communicator">MPI Communicator</param>
         public Cat(Intracommunicator communicator) : base(communicator)
         {
         }
 
+        /// <summary>
+        /// Additional cat specific actions for alive loop
+        /// </summary>
+        /// <param name="distanceToObjective">Distance to the closest rat</param>
         protected override void MoveEvent(int distanceToObjective)
         {
             // MEOW
@@ -23,11 +30,20 @@ namespace Rongeurville
             }
         }
 
+        /// <summary>
+        /// Meow was heard (unused for cat, necessary for hierarchy)
+        /// </summary>
+        /// <param name="meowTile">Tile on map from where meow was heard</param>
         protected override void ListenMeow(Tile meowTile)
         {
             //We do not react to Meow as a Cat.
         }
 
+        /// <summary>
+        /// Determine acceptable move tiles for a cat (4 adjacent tiles)
+        /// </summary>
+        /// <param name="center">Tile position to determine acceptable moves from</param>
+        /// <returns>List of acceptable move tiles around rat</returns>
         public override List<Tile> GetNeighbors(Tile center)
         {
             List<Tile> neighbors = new List<Tile>();
@@ -56,11 +72,19 @@ namespace Rongeurville
             return neighbors;
         }
 
+        /// <summary>
+        /// Determine whether the tile is a current goal for the cat (we look for rats)
+        /// </summary>
+        /// <param name="target">Target tile to check for current goal</param>
         public override bool IsGoal(Tile target)
         {
             return target.Content == TileContent.Rat;
         }
 
+        /// <summary>
+        /// Current tile content at our position
+        /// </summary>
+        /// <returns>We are a Cat</returns>
         public override TileContent GetTileContent()
         {
             return TileContent.Cat;
