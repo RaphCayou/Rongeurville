@@ -50,6 +50,17 @@
   <ItemGroup>
     <Compile Include="Actor.cs" />
     <Compile Include="PathTile.cs" />
+    <Compile Include="AStarTile.cs" />
+    <Compile Include="Communication\DeathConfirmation.cs" />
+    <Compile Include="Communication\IMessage.cs" />
+    <Compile Include="Communication\ISignal.cs" />
+    <Compile Include="Communication\KillSignal.cs" />
+    <Compile Include="Communication\MeowRequest.cs" />
+    <Compile Include="Communication\MeowSignal.cs" />
+    <Compile Include="Communication\MoveRequest.cs" />
+    <Compile Include="Communication\MoveSignal.cs" />
+    <Compile Include="Communication\Request.cs" />
+    <Compile Include="Communication\StartSignal.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Cat.cs" />
     <Compile Include="MapManager.cs" />
