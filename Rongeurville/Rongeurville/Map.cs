@@ -28,6 +28,11 @@ namespace Rongeurville
             Exits = new List<Tile>();
         }
 
+        public Tile GetTileByCoordinates(Coordinates position)
+        {
+            return Tiles[position.Y, position.X];
+        }
+
         private bool ValidateDestinationTile(Coordinates source, Coordinates destination)
         {
             if (!(0 <= destination.Y && destination.Y < Height
@@ -36,8 +41,8 @@ namespace Rongeurville
                 return false; // destination not part of the map
             }
 
-            Tile sourceTile = Tiles[source.Y, source.X];
-            Tile destinationTile = Tiles[destination.Y, destination.X];
+            Tile sourceTile = GetTileByCoordinates(source);
+            Tile destinationTile = GetTileByCoordinates(destination);
 
             // Basic validations
             if (destinationTile.Content == TileContent.Wall)
@@ -50,24 +55,76 @@ namespace Rongeurville
                 return false; // Cannot move to a tile with another actor of the same type as us
             }
 
-            // TODO Validations for actor type
-            
+            // Validations for actor type
+            if (sourceTile.Content == TileContent.Rat && (destinationTile.Content & (TileContent.Cheese | TileContent.Empty)) == 0)
+            {
+                return false; // Rats can only go on a Cheese or an empty tile
+            }
 
-            // Is tile is in map, consider it valid
-            return true;
+            if (sourceTile.Content == TileContent.Cat && (destinationTile.Content & (TileContent.Rat | TileContent.Empty)) == 0)
+            {
+                return false; // Cats can only go on a Rat or an empty tile
+            }
+
+            // We are trying to move something else than a rat or a cat. Impossible, do not allow it.
+            return false;
         }
 
-        public bool ApplyMove(Coordinates source, Coordinates destination)
+        public enum MoveEffect
+        {
+            InvalidMove,
+            AcceptedMove,
+            CheeseEaten,
+            RatCaptured,
+            RatEscaped,
+        }
+
+        public MoveEffect CheckForMoveEffects(Coordinates source, Coordinates destination)
         {
             if (!ValidateDestinationTile(source, destination))
             {
-                return false; // The move is not valid, we do not apply it
+                return MoveEffect.InvalidMove;
             }
 
-            // TODO apply move
-            
+            Tile sourceTile = GetTileByCoordinates(source);
+            Tile destinationTile = GetTileByCoordinates(destination);
 
-            return true;
+            if (destinationTile.Content == TileContent.Cheese)
+            {
+                return MoveEffect.CheeseEaten;
+            }
+
+            if (destinationTile.Content == TileContent.Rat)
+            {
+                return MoveEffect.RatCaptured;
+            }
+
+            if (sourceTile.Content == TileContent.Rat && destinationTile.Content == TileContent.Empty && Exits.Contains(destinationTile))
+            {
+                return MoveEffect.RatEscaped;
+            }
+
+            return MoveEffect.AcceptedMove;
+        }
+
+        public void ApplyMove(Coordinates source, Coordinates destination)
+        {
+            // TODO apply move
+            Tile sourceTile = GetTileByCoordinates(source);
+            Tile destinationTile = GetTileByCoordinates(destination);
+
+            switch (destinationTile.Content)
+            {
+                case TileContent.Cheese:
+                    Cheese.Remove(destinationTile);
+                    break;
+                case TileContent.Rat:
+                    Rats.Remove(destinationTile);
+                    break;
+            }
+
+            destinationTile.Content = sourceTile.Content;
+            sourceTile.Content = TileContent.Empty;
         }
 
         /// <summary>

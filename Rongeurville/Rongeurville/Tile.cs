@@ -2,11 +2,11 @@
 {
     public enum TileContent
     {
-        Empty,
-        Wall,
-        Cheese,
-        Cat,
-        Rat,
+        Empty = 0,
+        Wall = 1,
+        Cheese = 2,
+        Cat = 4,
+        Rat = 8,
     }
 
     public class Tile

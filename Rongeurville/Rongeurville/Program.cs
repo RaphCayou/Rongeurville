@@ -29,7 +29,7 @@ namespace Rongeurville
                 if (comm.Rank == 0) // Master
                 {
                     Console.WriteLine("Creating Map ... from rank {0}", comm.Rank);
-                    new MapManager(comm, mapFilePath, nbrRats, nbrCats);//.Start();
+                    new MapManager(comm, mapFilePath, nbrRats, nbrCats).Start();
                     Console.WriteLine("~ Closing Map ... from rank {0}", comm.Rank);
                 }
                 else // Slave
@@ -37,13 +37,13 @@ namespace Rongeurville
                     if (comm.Rank > 0 && comm.Rank <= nbrRats)
                     {
                         Console.WriteLine("Creating Rat ... from rank {0}", comm.Rank);
-                        new Rat(comm);//.Start();
+                        new Rat(comm).Start();
                         Console.WriteLine("~ Closing Rat ... from rank {0}", comm.Rank);
                     }
                     else if (comm.Rank > nbrRats && comm.Rank <= comm.Size)
                     {
                         Console.WriteLine("Creating Cat ... from rank {0}", comm.Rank);
-                        new Cat(comm);//.Start();
+                        new Cat(comm).Start();
                         Console.WriteLine("~ Closing Cat ... from rank {0}", comm.Rank);
                     }
                 }

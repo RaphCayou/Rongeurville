@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Rongeurville.Map;
 
 namespace Rongeurville
 {
@@ -161,18 +162,50 @@ namespace Rongeurville
         {
             // Pessimistically assume the move is going to be denied
             MoveSignal moveSignal = new MoveSignal { InitialTile = sender.Position, FinalTile = sender.Position };
-            
+
             // Try to move and update the final position
-            bool moveAccepted = map.ApplyMove(sender.Position, moveRequest.DesiredTile);
-            if (moveAccepted)
+            MoveEffect effect = map.CheckForMoveEffects(sender.Position, moveRequest.DesiredTile);
+            if (effect != MoveEffect.InvalidMove)
             {
+                switch (effect)
+                {
+                    case MoveEffect.RatCaptured:
+                        HandleRatRemoval(GetActorProcessByCoordinates(moveRequest.DesiredTile));
+                        break;
+                    case MoveEffect.RatEscaped:
+                        HandleRatRemoval(GetActorProcessByCoordinates(sender.Position));
+                        break;
+                }
+
+                // Move is valid and the destination tile no longer has important information
+                map.ApplyMove(sender.Position, moveRequest.DesiredTile);
                 moveSignal.FinalTile = moveRequest.DesiredTile;
             }
+            
+            if (map.Cheese.Count == 0 || map.Rats.Count == 0)
+            {
+                // Signal to everyone that the game is over and they should stop.
+                KillSignal killSignal = new KillSignal();
+                comm.Broadcast(ref killSignal, 0);
+            }
+            else
+            {
+                // Broadcast the result of the move
+                comm.Broadcast(ref moveSignal, 0);
+            }
+        }
 
-            // TODO Kill rats or cats
+        /// <summary>
+        /// Remove rat from playing actors and signal him that he died.
+        /// </summary>
+        /// <param name="rat"></param>
+        private void HandleRatRemoval(ActorProcess rat)
+        {
+            // The cat cannot play anymore
+            rat.Playing = false;
 
-            // Broadcast the result
-            comm.Broadcast(ref moveSignal, 0);
+            // Notify the rat that he should stop
+            comm.Send(new KillSignal(), rat.Rank, 0);
         }
 
         /// <summary>
@@ -214,6 +247,11 @@ namespace Rongeurville
         private ActorProcess GetActorProcessByRank(int rank)
         {
             return cats.First(c => c.Rank == rank) ?? rats.First(r => r.Rank == rank);
+        }
+
+        private ActorProcess GetActorProcessByCoordinates(Coordinates position)
+        {
+            return cats.First(c => c.Position.Equals(position)) ?? rats.First(r => r.Position.Equals(position));
         }
     }
 }
