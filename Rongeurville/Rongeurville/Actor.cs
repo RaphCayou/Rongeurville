@@ -19,7 +19,7 @@ namespace Rongeurville
 
         public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool IsGoal(Tile target);
-        protected abstract Coordinates DoYourThings();
+        protected abstract void MoveEvent(int distanceToObjective);
         protected abstract void ListenMeow(Tile moewTile);
 
         public abstract TileContent GetTileContent();
@@ -35,7 +35,7 @@ namespace Rongeurville
         {
             map = comm.Receive<Map>(0, 0);
             currentTile = map.GetCurrentTileByRank(rank);
-            DoThing();
+            AliveLoop();
         }
 
         /// <summary>
@@ -117,11 +117,14 @@ namespace Rongeurville
             return IsGoal(target) ? 0 : 1;
         }
 
-        public void DoThing()
+        public void AliveLoop()
         {
             while (!shouldDie)
             {
-                comm.ImmediateSend(new MoveRequest { Rank = rank, DesiredTile = DoYourThings() }, 0, 0);
+
+                Tuple<Tile, int> searchResult = GetDirection();
+                MoveEvent(searchResult.Item2);
+                comm.ImmediateSend(new MoveRequest { Rank = rank, DesiredTile = searchResult.Item1.Position }, 0, 0);
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {

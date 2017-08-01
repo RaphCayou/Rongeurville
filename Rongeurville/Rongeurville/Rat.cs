@@ -17,16 +17,13 @@ namespace Rongeurville
             timeSinceLastMeow = 0;
         }
 
-        protected override Coordinates DoYourThings()
+        protected override void MoveEvent(int distanceToObjective)
         {
-            Tuple<Tile, int> aStarResult = GetDirection();
-
             // Be less scared
             if (timeSinceLastMeow > 0)
             {
                 timeSinceLastMeow -= 1;
             }
-            return aStarResult.Item1.Position;
         }
 
         protected override void ListenMeow(Tile meowTile)

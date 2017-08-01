@@ -14,16 +14,13 @@ namespace Rongeurville
         {
         }
 
-        protected override Coordinates DoYourThings()
+        protected override void MoveEvent(int distanceToObjective)
         {
-            // Get closest rat
-            Tuple<Tile, int> searchResult = GetDirection();
             // MEOW
-            if (searchResult.Item2 <= 10)
+            if (distanceToObjective <= 10)
             {
                 comm.ImmediateSend(new MeowRequest { Rank = rank }, 0, 0);
             }
-            return searchResult.Item1.Position;
         }
 
         protected override void ListenMeow(Tile meowTile)
