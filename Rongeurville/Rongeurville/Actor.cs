@@ -157,12 +157,14 @@ namespace Rongeurville
                 ListenMeow(map.Tiles[meowSignal.MeowLocation.Y, meowSignal.MeowLocation.X]);
                 return false;
             }
+
             KillSignal killSignal = message as KillSignal;
             if (killSignal != null)
             {
                 shouldDie = true;
                 return true;
             }
+
             return false;
         }
     }
