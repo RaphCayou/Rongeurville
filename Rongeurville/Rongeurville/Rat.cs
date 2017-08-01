@@ -10,11 +10,12 @@ namespace Rongeurville
     public class Rat : Actor
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Cheese, TileContent.Empty };
-        private int timeSinceLastMeow = 0;
+        private int timeSinceLastMeow;
         private Tile lastMeowLocation;
 
         public Rat(Intracommunicator communicator) : base(communicator)
         {
+            timeSinceLastMeow = 0;
         }
 
         protected override void DoYourThings()
@@ -31,6 +32,11 @@ namespace Rongeurville
                 timeSinceLastMeow -= 1;
             }
             throw new NotImplementedException();
+        }
+
+        protected override void ListenMoew(Tile moewTile)
+        {
+            //TODO Count the number of rat step between the tile and the rat
         }
 
         public override List<Tile> GetNeighbors(Tile center)

@@ -28,6 +28,11 @@ namespace Rongeurville
             // TODO Move according to response, Die if necessary
         }
 
+        protected override void ListenMoew(Tile moewTile)
+        {
+            //We do not react to Moew as a Cat.
+        }
+
         public override List<Tile> GetNeighbors(Tile center)
         {
             List<Tile> neighbors = new List<Tile>();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MPI;
+using Rongeurville.Communication;
 
 namespace Rongeurville
 {
@@ -19,6 +20,7 @@ namespace Rongeurville
         public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool IsGoal(Tile target);
         protected abstract void DoYourThings();
+        protected abstract void ListenMoew(Tile moewTile);
 
         public abstract TileContent GetTileContent();
 
@@ -118,6 +120,30 @@ namespace Rongeurville
             {
                 DoYourThings();
                 //TODO update avec tout les mises à jours de la carte(tant que notre position est pas update)
+                bool moveResponseReceived = false;
+                ReceiveRequest receiveRequest = comm.ImmediateReceive<Message>(0, 0);
+                while (!receiveRequest.Test().Cancelled)
+                {
+                    Message message = (Message)receiveRequest.GetValue();
+                    MoveSignal moveSignal = message as MoveSignal;
+                    if (moveSignal != null)
+                    {
+                        
+                    }
+                    else
+                    {
+                        MeowSignal meowSignal = message as MeowSignal;
+                        if (meowSignal != null)
+                        {
+                            
+                        }
+                        else
+                        {
+                            KillSignal killSignal = message as KillSignal;
+
+                        }
+                    }
+                }
             }
         }
     }
