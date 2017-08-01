@@ -41,8 +41,8 @@ namespace Rongeurville
             }
 
             // Is tile is in map, consider it valid
-            return 0 <= destination.Y && destination.Y < height
-                && 0 <= destination.X && destination.X < width;
+            return 0 <= destination.Y && destination.Y < Height
+                && 0 <= destination.X && destination.X < Width;
         }
 
         /// <summary>
