@@ -46,6 +46,25 @@ namespace Rongeurville
         }
 
         /// <summary>
+        /// Return the Tile associated with the rank of the process. May be a rat or a cat.
+        /// </summary>
+        /// <param name="rank">Rank of the process</param>
+        /// <returns></returns>
+        public Tile GetCurrentTileByRank(int rank)
+        {
+            if (1 <= rank && rank <= Rats.Count)
+            {
+                return Rats[rank - 1];
+            }
+            else if (Rats.Count + 1 <= rank && rank <= Rats.Count + Cats.Count)
+            {
+                return Cats[rank - Rats.Count - 1];
+            }
+
+            throw new Exception("Rank is not a cat nor a rat.");
+        }
+
+        /// <summary>
         /// Load a file and parse its content to create a map from it.
         /// </summary>
         /// <param name="mapFilePath">The file to open for reading</param>

@@ -16,11 +16,12 @@ namespace Rongeurville
             {
                 Intracommunicator comm = Communicator.world;
 
-                if (args.Length != 2)
-                    throw new ArgumentException("You must have 2 command line arguments : the number of rats followed by the number of cats");
+                if (args.Length != 3)
+                    throw new ArgumentException("You must have 3 command line arguments : the map file path, the number of rats and the number of cats");
                 
-                int nbrRats = Int32.Parse(args[0]);
-                int nbrCats = Int32.Parse(args[1]);
+                string mapFilePath = args[0];
+                int nbrRats = Int32.Parse(args[1]);
+                int nbrCats = Int32.Parse(args[2]);
 
                 if (nbrRats + nbrCats + 1 != comm.Size)
                     throw new ArgumentException("The total nuumber of actors (rats + cats + map) must be equal to the number of processes");
@@ -28,7 +29,7 @@ namespace Rongeurville
                 if (comm.Rank == 0) // Master
                 {
                     Console.WriteLine("Creating Map ... from rank {0}", comm.Rank);
-                    new MapManager(comm);//.Start()
+                    new MapManager(comm, mapFilePath, nbrRats, nbrCats);//.Start();
                     Console.WriteLine("~ Closing Map ... from rank {0}", comm.Rank);
                 }
                 else // Slave

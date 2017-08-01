@@ -1,5 +1,4 @@
 ﻿using MPI;
-using Rongeurville.Communication;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,6 +36,11 @@ namespace Rongeurville
 
             map = Map.LoadMapFromFile(mapFilePath);
 
+<<<<<<< HEAD
+            map = Map.LoadMapFromFile("map.txt");
+
+            Console.WriteLine(map.ToString());
+=======
             if (map.Rats.Count != numberOfRats || map.Cats.Count != numberOfCats)
             {
                 throw new Exception("Rat or cat counts does not match with map loaded.");
@@ -61,36 +65,35 @@ namespace Rongeurville
         public void Start()
         {
             // Send map to everyone and start the game
-            StartSignal startSignal = new StartSignal { Map = map };
-            comm.Broadcast(ref startSignal, 0);
+            StartMessage startMessage = new StartMessage(map);
+            comm.Broadcast(startMessage, 0);
 
             while (ContinueExecution)
             {
-                // Receive next message and handle it
-                Message message = comm.Receive<Message>(Communicator.anySource, 0);
+                // Receive next message and apply treatment
+                IMessage message = comm.Receive<IMessage>(Communicator.anySource, 0);
 
-                if (message is Communication.Request)
+                if (message is Rongeurville.Request)
                 {
-                    if (message.GetType() == typeof(MoveRequest))
+                    switch (message.GetType())
                     {
-                        HandleMovePlayer((MoveRequest)message);
-                    }
-                    else if (message.GetType() == typeof(MeowRequest))
-                    {
-                        HandleMeow((MeowRequest)message);
-                    }
-                    else if (message.GetType() == typeof(DeathConfirmation))
-                    {
-                        HandleDeath((DeathConfirmation)message);
-                        if (AreAllActorsFinished())
-                        {
-                            // Stop the MapManager
-                            ContinueExecution = false;
-                        }
-                    }
-                    else
-                    {
-                        // TODO This is an unsupported request, log it
+                        case MoveRequest:
+                            MovePlayer((MoveRequest)message);
+                            break;
+                        case MeowRequest:
+                            HandleMeow((MeowRequest)message);
+                            break;
+                        case DeathConfirmation:
+                            HandleDeath((DeathConfirmation)message);
+                            if (AreAllActorsFinished())
+                            {
+                                // Stop the MapManager
+                                ContinueExecution = false;
+                            }
+                            break;
+                        default:
+                            // TODO This is an unsupported request, log it
+                            break;
                     }
                 }
                 else
@@ -101,10 +104,10 @@ namespace Rongeurville
         }
 
         /// <summary>
-        /// Handles a move request by a player and signal it to the other processes
+        /// Moves a player and signal it to the other processes
         /// </summary>
         /// <param name="moveRequest"></param>
-        private void HandleMovePlayer(MoveRequest moveRequest)
+        private void MovePlayer(MoveRequest moveRequest)
         {
 
         }
@@ -113,7 +116,7 @@ namespace Rongeurville
         /// Handles a meow and signal it to other processes
         /// </summary>
         /// <param name=""></param>
-        private void HandleMeow(MeowRequest meowRequest)
+        private void HandleMeow(MeowRequest)
         {
 
         }
@@ -124,8 +127,7 @@ namespace Rongeurville
         /// <param name="deathConfirmation"></param>
         private void HandleDeath(DeathConfirmation deathConfirmation)
         {
-            ActorProcess dyingActorProcess = GetActorProcessByRank(deathConfirmation.Rank);
-            dyingActorProcess.IsFinished = true;
+            
         }
 
         /// <summary>
@@ -137,14 +139,10 @@ namespace Rongeurville
             return !(rats.Any(rat => !rat.IsFinished) || cats.Any(cat => !cat.IsFinished));
         }
 
-        /// <summary>
-        /// Get the ActorProcess linked to the rank
-        /// </summary>
-        /// <param name="rank"></param>
-        /// <returns></returns>
         private ActorProcess GetActorProcessByRank(int rank)
         {
             return cats.First(c => c.Rank == rank) ?? rats.First(r => r.Rank == rank);
+>>>>>>> Added basics to MapManager
         }
     }
 }
