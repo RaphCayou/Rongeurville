@@ -30,8 +30,6 @@ namespace Rongeurville
 
         private bool ValidateDestinationTile(Coordinates source, Coordinates destination)
         {
-            // TODO Change the parameters to coordinates instead of tile because the content may not be up to date
-
             if (!(0 <= destination.Y && destination.Y < Height
                 && 0 <= destination.X && destination.X < Width))
             {
@@ -61,8 +59,6 @@ namespace Rongeurville
 
         public bool ApplyMove(Coordinates source, Coordinates destination)
         {
-            // TODO Change the parameters to coordinates instead of tile because the content may not be up to date
-
             if (!ValidateDestinationTile(source, destination))
             {
                 return false; // The move is not valid, we do not apply it

@@ -145,12 +145,18 @@ namespace Rongeurville
         {
             // Pessimistically assume the move is going to be denied
             MoveSignal moveSignal = new MoveSignal { InitialTile = sender.Position, FinalTile = sender.Position };
-
-            // Check if move is valid
-            map.ApplyMove(sender.Position, moveRequest.DesiredTile);
             
-            // Apply move
+            // Try to move and update the final position
+            bool moveAccepted = map.ApplyMove(sender.Position, moveRequest.DesiredTile);
+            if (moveAccepted)
+            {
+                moveSignal.FinalTile = moveRequest.DesiredTile;
+            }
+
+            // TODO Kill rats or cats
+
             // Broadcast the result
+            comm.Broadcast(ref moveSignal, 0);
         }
 
         /// <summary>

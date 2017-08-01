@@ -11,7 +11,7 @@
 
     public class Tile
     {
-        public Coordinates Position;
+        public Coordinates Position = new Coordinates();
         public TileContent Content;
 
         public int X {
