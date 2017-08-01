@@ -129,6 +129,7 @@ namespace Rongeurville
                     waitingMoveResponse = !HandleMessage(message);
                 }
             }
+            comm.Send(new DeathConfirmation { Rank = rank }, 0, 0);
         }
 
         /// <summary>

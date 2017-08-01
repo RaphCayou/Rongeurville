@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MPI;
+using Rongeurville.Communication;
 
 namespace Rongeurville
 {
@@ -20,12 +21,13 @@ namespace Rongeurville
             // MEOW
             if (aStarResult.Item2 <= 10)
             {
-                var request = comm.ImmediateSend("MEOW", 0, 0);
+                comm.ImmediateSend(new MeowRequest { Rank = rank }, 0, 0);
             }
+            //MoveRequest
+            //comm.ImmediateSend();
             // Communicate intent with map
-            string response;
-            comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
-            // TODO Move according to response, Die if necessary
+            //string response;
+            //comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
         }
 
         protected override void ListenMoew(Tile moewTile)
