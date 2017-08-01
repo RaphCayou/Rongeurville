@@ -23,7 +23,7 @@ namespace Rongeurville
             //    Console.WriteLine(msg + " from " + comm.Rank);
             //}
 
-            Map map = Map.LoadMapFromFile("map.txt");
+            map = Map.LoadMapFromFile("map.txt");
 
             Console.WriteLine(map.ToString());
         }
