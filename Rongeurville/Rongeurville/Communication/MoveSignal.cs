@@ -5,7 +5,7 @@ namespace Rongeurville.Communication
     [Serializable]
     public class MoveSignal : Signal
     {
-        public Tile InitialTile;
-        public Tile FinalTile;
+        public Coordinates InitialTile;
+        public Coordinates FinalTile;
     }
 }

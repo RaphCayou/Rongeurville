@@ -22,8 +22,9 @@ namespace Rongeurville
         class ActorProcess
         {
             public int Rank;
-            public bool IsFinished;
-            public Tile Position;
+            public bool IsDeadProcess = false;
+            public bool Playing = true;
+            public Coordinates Position;
         }
 
         public MapManager(Intracommunicator comm, string mapFilePath, int numberOfRats, int numberOfCats)
@@ -46,15 +47,15 @@ namespace Rongeurville
             rats = map.Rats.Select(t => new ActorProcess
             {
                 Rank = ++count,
-                IsFinished = false,
-                Position = t
+                IsDeadProcess = false,
+                Position = t.Position
             }).ToArray();
 
             cats = map.Cats.Select(t => new ActorProcess
             {
                 Rank = ++count,
-                IsFinished = false,
-                Position = t
+                IsDeadProcess = false,
+                Position = t.Position
             }).ToArray();
         }
 
@@ -66,37 +67,72 @@ namespace Rongeurville
 
             while (ContinueExecution)
             {
-                // Receive next message and handle it
-                Message message = comm.Receive<Message>(Communicator.anySource, 0);
+                // Treat all message for as long as the execution is supposed to continue
+                HandleMessageReceive();
+            }
+        }
 
-                if (message is Communication.Request)
+        /// <summary>
+        /// Handles the reception of a message by interpreting it and taking the necessary actions.
+        /// </summary>
+        private void HandleMessageReceive()
+        {
+            // Receive next message and handle it
+            Message message = comm.Receive<Message>(Communicator.anySource, 0);
+
+            Communication.Request request = message as Communication.Request;
+            if (request != null)
+            {
+                ActorProcess sender = GetActorProcessByRank(request.Rank);
+
+                // Death confirmation
+                DeathConfirmation deathConfirmation = message as DeathConfirmation;
+                if (deathConfirmation != null)
                 {
-                    if (message.GetType() == typeof(MoveRequest))
+                    HandleDeath(deathConfirmation, sender);
+
+                    // TODO Change this for a count of the number of death processes 
+                    if (AreAllActorsFinished())
                     {
-                        HandleMovePlayer((MoveRequest)message);
+                        // Stop the MapManager
+                        ContinueExecution = false;
                     }
-                    else if (message.GetType() == typeof(MeowRequest))
-                    {
-                        HandleMeow((MeowRequest)message);
-                    }
-                    else if (message.GetType() == typeof(DeathConfirmation))
-                    {
-                        HandleDeath((DeathConfirmation)message);
-                        if (AreAllActorsFinished())
-                        {
-                            // Stop the MapManager
-                            ContinueExecution = false;
-                        }
-                    }
-                    else
-                    {
-                        // TODO This is an unsupported request, log it
-                    }
+
+                    return;
                 }
-                else
+
+                // Validate that the process is still in the game (playing).
+                // This is meant to deny requests that were sent in between the moment the actor was removed from the game and the moment the actor learned about it.
+                if (!sender.Playing)
                 {
-                    // TODO This is an invalid message, only request are accepted, log it
+                    return; // Ignore the message, the process is no longer playing
                 }
+
+                // Move request
+                MoveRequest moveRequest = message as MoveRequest;
+                if (moveRequest != null)
+                {
+                    HandleMovePlayer(moveRequest, sender);
+
+                    return;
+                }
+
+                // Meow request
+                MeowRequest meowRequest = message as MeowRequest;
+                if (meowRequest != null)
+                {
+                    HandleMeow(meowRequest, sender);
+
+                    return;
+                }
+                
+                // TODO At this point, this is an unsupported request, log it
+
+            }
+            else
+            {
+                // TODO This is an invalid message, only request are accepted, log it
+
             }
         }
 
@@ -104,28 +140,39 @@ namespace Rongeurville
         /// Handles a move request by a player and signal it to the other processes
         /// </summary>
         /// <param name="moveRequest"></param>
-        private void HandleMovePlayer(MoveRequest moveRequest)
+        /// <param name="sender"></param>
+        private void HandleMovePlayer(MoveRequest moveRequest, ActorProcess sender)
         {
+            // Pessimistically assume the move is going to be denied
+            MoveSignal moveSignal = new MoveSignal { InitialTile = sender.Position, FinalTile = sender.Position };
 
+            // Check if move is valid
+            map.ApplyMove(sender.Position, moveRequest.DesiredTile);
+            
+            // Apply move
+            // Broadcast the result
         }
 
         /// <summary>
         /// Handles a meow and signal it to other processes
         /// </summary>
-        /// <param name=""></param>
-        private void HandleMeow(MeowRequest meowRequest)
+        /// <param name="meowRequest"></param>
+        /// <param name="sender"></param>
+        private void HandleMeow(MeowRequest meowRequest, ActorProcess sender)
         {
-
+            MeowSignal meowSignal = new MeowSignal { MeowLocation = sender.Position };
+            comm.Broadcast(ref meowSignal, 0);
         }
 
         /// <summary>
         /// Handles a death
         /// </summary>
         /// <param name="deathConfirmation"></param>
-        private void HandleDeath(DeathConfirmation deathConfirmation)
+        /// <param name="sender"></param>
+        private void HandleDeath(DeathConfirmation deathConfirmation, ActorProcess sender)
         {
             ActorProcess dyingActorProcess = GetActorProcessByRank(deathConfirmation.Rank);
-            dyingActorProcess.IsFinished = true;
+            dyingActorProcess.IsDeadProcess = true;
         }
 
         /// <summary>
@@ -134,7 +181,7 @@ namespace Rongeurville
         /// <returns></returns>
         private bool AreAllActorsFinished()
         {
-            return !(rats.Any(rat => !rat.IsFinished) || cats.Any(cat => !cat.IsFinished));
+            return !(rats.Any(rat => !rat.IsDeadProcess) || cats.Any(cat => !cat.IsDeadProcess));
         }
 
         /// <summary>

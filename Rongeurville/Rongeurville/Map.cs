@@ -28,21 +28,50 @@ namespace Rongeurville
             Exits = new List<Tile>();
         }
 
-        public bool ValidateDestinationTile(Actor actor, Tile destination)
+        private bool ValidateDestinationTile(Coordinates source, Coordinates destination)
         {
-            if (destination.Content == TileContent.Wall)
+            // TODO Change the parameters to coordinates instead of tile because the content may not be up to date
+
+            if (!(0 <= destination.Y && destination.Y < Height
+                && 0 <= destination.X && destination.X < Width))
+            {
+                return false; // destination not part of the map
+            }
+
+            Tile sourceTile = Tiles[source.Y, source.X];
+            Tile destinationTile = Tiles[destination.Y, destination.X];
+
+            // Basic validations
+            if (destinationTile.Content == TileContent.Wall)
             {
                 return false; // Cannot move on a wall
             }
 
-            if (destination.Content == actor.GetTileContent())
+            if (destinationTile.Content == sourceTile.Content)
             {
                 return false; // Cannot move to a tile with another actor of the same type as us
             }
 
+            // TODO Validations for actor type
+            
+
             // Is tile is in map, consider it valid
-            return 0 <= destination.Y && destination.Y < Height
-                && 0 <= destination.X && destination.X < Width;
+            return true;
+        }
+
+        public bool ApplyMove(Coordinates source, Coordinates destination)
+        {
+            // TODO Change the parameters to coordinates instead of tile because the content may not be up to date
+
+            if (!ValidateDestinationTile(source, destination))
+            {
+                return false; // The move is not valid, we do not apply it
+            }
+
+            // TODO apply move
+            
+
+            return true;
         }
 
         /// <summary>

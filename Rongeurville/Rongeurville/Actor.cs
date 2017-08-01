@@ -145,7 +145,7 @@ namespace Rongeurville
                 //map. //TODO call l'application d'un mouvement sur la map
                 if (Equals(moveSignal.InitialTile, currentTile))
                 {
-                    currentTile = moveSignal.FinalTile;
+                    currentTile = map.Tiles[moveSignal.FinalTile.Y, moveSignal.FinalTile.X];
                     return true;
                 }
                 return false;
@@ -154,7 +154,7 @@ namespace Rongeurville
             MeowSignal meowSignal = message as MeowSignal;
             if (message != null)
             {
-                ListenMoew(meowSignal.MeowLocation);
+                ListenMeow(map.Tiles[meowSignal.MeowLocation.Y, meowSignal.MeowLocation.X]);
                 return false;
             }
             KillSignal killSignal = message as KillSignal;

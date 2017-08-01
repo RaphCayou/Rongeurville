@@ -8,15 +8,49 @@
         Cat,
         Rat,
     }
-    public class Tile
+
+    public class Coordinates
     {
         public int X;
         public int Y;
+
+        protected bool Equals(Coordinates other)
+        {
+            return X == other.X && Y == other.Y;
+        }
+    }
+
+    public class Tile
+    {
+        public Coordinates Position;
         public TileContent Content;
+
+        public int X {
+            get
+            {
+                return Position.X;
+            }
+            set
+            {
+                Position.X = value;
+            }
+        }
+
+        public int Y
+        {
+            get
+            {
+                return Position.Y;
+            }
+            set
+            {
+                Position.Y = value;
+            }
+        }
 
         protected bool Equals(Tile other)
         {
-            return X == other.X && Y == other.Y;
+            return Position.Equals(other.Position);
         }
 
         public override bool Equals(object obj)
