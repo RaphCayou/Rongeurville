@@ -14,11 +14,10 @@ namespace Rongeurville
         {
             using (new MPI.Environment(ref args))
             {
-                // MPI program goes here!
-                Console.WriteLine("Hello, World! from rank " + Communicator.world.Rank
-                                  + " (running on " + MPI.Environment.ProcessorName + ")");
-
                 Intracommunicator comm = Communicator.world;
+                
+                Console.WriteLine("Opening MPI ... from rank {0} (running on {1})", comm.Rank, MPI.Environment.ProcessorName);
+                
                 if (comm.Rank == 0)
                 {
                     // program for rank 0
@@ -30,6 +29,8 @@ namespace Rongeurville
                     // program for all other ranks
                     comm.Send("Hello", 0, 0);
                 }
+
+                Console.WriteLine("Closing MPI ... from rank {0}", comm.Rank);
             }
         }
     }

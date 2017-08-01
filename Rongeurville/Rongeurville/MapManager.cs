@@ -26,7 +26,6 @@ namespace Rongeurville
             Map map = Map.LoadMapFromFile("map.txt");
 
             Console.WriteLine(map.ToString());
-            Console.ReadKey();
         }
     }
 }
