@@ -22,7 +22,7 @@ namespace Rongeurville
 
             public int GetHashCode(PathTile obj)
             {
-                return (obj.Value != null ? obj.Value.GetHashCode() : 0);
+                return obj.Value != null ? obj.Value.GetHashCode() : 0;
             }
         }
 
