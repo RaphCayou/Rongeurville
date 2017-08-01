@@ -8,32 +8,24 @@ namespace Rongeurville
     public class Cat : Actor
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Rat, TileContent.Empty };
-        private bool ShouldDie { get; set; } = false;
-        private Intracommunicator comm;
 
-        public Cat()
+        public Cat() : base()
         {
-            //Task.Run(() => DoCatThings());
-            comm = Communicator.world;
-            DoCatThings();
         }
 
-        private void DoCatThings()
+        protected override void DoYourThings()
         {
-            while (!ShouldDie)
+            // Get closest rat
+            Tuple<Tile, int> aStarResult = GetDirection();
+            // MEOW
+            if (aStarResult.Item2 <= 10)
             {
-                // Get closest rat
-                Tuple<Tile, int> aStarResult = GetDirection();
-                // MEOW
-                if (aStarResult.Item2 <= 10)
-                {
-                    var request = comm.ImmediateSend("MEOW", 0, 0);
-                }
-                // Communicate intent with map
-                string response;
-                comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
-                // TODO Move according to response, Die if necessary
+                var request = comm.ImmediateSend("MEOW", 0, 0);
             }
+            // Communicate intent with map
+            string response;
+            comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
+            // TODO Move according to response, Die if necessary
         }
 
         public override List<Tile> GetNeighboors(Tile center)

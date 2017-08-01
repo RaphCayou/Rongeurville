@@ -10,32 +10,25 @@ namespace Rongeurville
     public class Rat : Actor
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Cheese, TileContent.Empty };
-        private bool shouldDie = false;
         private int timeSinceLastMeow = 0;
         private Tile lastMeowLocation;
-        private Intracommunicator comm;
 
-        public Rat()
+        public Rat() : base()
         {
-            comm = Communicator.world;
-            DoRatThings();
         }
 
-        private void DoRatThings()
+        protected override void DoYourThings()
         {
-            while (!shouldDie)
+            // TODO Listen for Meows <= 7 tiles from rat
+            //if meow -> time += 5
+            Tuple<Tile, int> aStarResult = GetDirection();
+
+            // TODO Communicate intent with map
+
+            // Be less scared
+            if (timeSinceLastMeow > 0)
             {
-                // TODO Listen for Meows <= 7 tiles from rat
-                //if meow -> time += 5
-                Tuple<Tile, int> aStarResult = GetDirection();
-
-                // TODO Communicate intent with map
-
-                // Be less scared
-                if (timeSinceLastMeow > 0)
-                {
-                    timeSinceLastMeow -= 1;
-                }
+                timeSinceLastMeow -= 1;
             }
             throw new NotImplementedException();
         }

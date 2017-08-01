@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MPI;
 
 namespace Rongeurville
 {
@@ -12,10 +13,20 @@ namespace Rongeurville
         protected Tile currentTile;
 
         protected Map map;
+        protected Intracommunicator comm;
+        protected bool shouldDie = false;
+
         public abstract List<Tile> GetNeighboors(Tile center);
         public abstract bool IsGoal(Tile target);
+        protected abstract void DoYourThings();
 
         public abstract TileContent GetTileContent();
+
+        protected Actor()
+        {
+            comm = Communicator.world;
+            DoYourThings();
+        }
 
         /// <summary>
         /// Find the closest objective to go on.
@@ -92,7 +103,15 @@ namespace Rongeurville
 
         private double GetEstimate(Tile target)
         {
-            return IsGoal(target)? 0 : 1;
+            return IsGoal(target) ? 0 : 1;
+        }
+
+        public void DoThing()
+        {
+            while (!shouldDie)
+            {
+                DoYourThings();
+            }
         }
     }
 }
