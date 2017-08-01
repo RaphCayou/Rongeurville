@@ -15,7 +15,7 @@ namespace Rongeurville
 
         protected Map map;
         protected Intracommunicator comm;
-        protected bool shouldDie = false;
+        protected bool shouldDie;
 
         public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool IsGoal(Tile target);
@@ -28,11 +28,13 @@ namespace Rongeurville
         {
             comm = communicator;
             rank = comm.Rank;
+            shouldDie = false;
         }
 
         public void Start()
         {
-            //TODO reveive la map et le start location et le signal de debut de partie
+            map = comm.Receive<Map>(0, 0);
+            currentTile = map.GetCurrentTileByRank(rank);
             DoThing();
         }
 
@@ -42,7 +44,8 @@ namespace Rongeurville
         /// <returns>Next to tile to go on and the cost to go on that tile.</returns>
         public Tuple<Tile, int> GetDirection()
         {
-            PathTile lookingTile = new PathTile { CostSoFar = 0, Estimate = GetEstimate(currentTile), Value = currentTile };
+            PathTile lookingTile =
+                new PathTile { CostSoFar = 0, Estimate = GetEstimate(currentTile), Value = currentTile };
             bool pathFind = false;
             int pathCost = -1;
             List<PathTile> openedTiles = new List<PathTile>();
@@ -119,32 +122,47 @@ namespace Rongeurville
             while (!shouldDie)
             {
                 DoYourThings();
-                //TODO update avec tout les mises à jours de la carte(tant que notre position est pas update)
-                bool moveResponseReceived = false;
-                ReceiveRequest receiveRequest = comm.ImmediateReceive<Message>(0, 0);
-                while (!receiveRequest.Test().Cancelled)
+                bool waitingMoveResponse = true;
+                while (waitingMoveResponse)
                 {
-                    Message message = (Message)receiveRequest.GetValue();
-                    MoveSignal moveSignal = message as MoveSignal;
-                    if (moveSignal != null)
-                    {
-                        
-                    }
-                    else
-                    {
-                        MeowSignal meowSignal = message as MeowSignal;
-                        if (meowSignal != null)
-                        {
-                            
-                        }
-                        else
-                        {
-                            KillSignal killSignal = message as KillSignal;
-
-                        }
-                    }
+                    Message message = comm.Receive<Message>(0, 0);
+                    waitingMoveResponse = !HandleMessage(message);
                 }
             }
+        }
+
+        /// <summary>
+        /// Handle the message and call the corresponding methods. Return if the message was our response.
+        /// </summary>
+        /// <param name="message">Message to handle.</param>
+        /// <returns>True if the message was targeted at the current actor.</returns>
+        private bool HandleMessage(Message message)
+        {
+            MoveSignal moveSignal = message as MoveSignal;
+            if (message != null)
+            {
+                //map. //TODO call l'application d'un mouvement sur la map
+                if (Equals(moveSignal.InitialTile, currentTile))
+                {
+                    currentTile = moveSignal.FinalTile;
+                    return true;
+                }
+                return false;
+            }
+
+            MeowSignal meowSignal = message as MeowSignal;
+            if (message != null)
+            {
+                ListenMoew(meowSignal.MeowLocation);
+                return false;
+            }
+            KillSignal killSignal = message as KillSignal;
+            if (message != null)
+            {
+                shouldDie = true;
+                return true;
+            }
+            return false;
         }
     }
 }
