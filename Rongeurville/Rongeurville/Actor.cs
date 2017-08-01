@@ -20,7 +20,7 @@ namespace Rongeurville
         public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool IsGoal(Tile target);
         protected abstract void DoYourThings();
-        protected abstract void ListenMoew(Tile moewTile);
+        protected abstract void ListenMeow(Tile moewTile);
 
         public abstract TileContent GetTileContent();
 

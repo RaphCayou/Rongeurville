@@ -30,9 +30,9 @@ namespace Rongeurville
             //comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
         }
 
-        protected override void ListenMoew(Tile moewTile)
+        protected override void ListenMeow(Tile meowTile)
         {
-            //We do not react to Moew as a Cat.
+            //We do not react to Meow as a Cat.
         }
 
         public override List<Tile> GetNeighbors(Tile center)

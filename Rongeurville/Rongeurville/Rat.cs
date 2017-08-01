@@ -11,7 +11,6 @@ namespace Rongeurville
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Cheese, TileContent.Empty };
         private int timeSinceLastMeow;
-        private Tile lastMeowLocation;
 
         public Rat(Intracommunicator communicator) : base(communicator)
         {
@@ -34,9 +33,48 @@ namespace Rongeurville
             throw new NotImplementedException();
         }
 
-        protected override void ListenMoew(Tile moewTile)
+        protected override void ListenMeow(Tile meowTile)
         {
-            //TODO Count the number of rat step between the tile and the rat
+            int x = currentTile.X;
+            int y = currentTile.Y;
+            int steps = 0;
+
+            // UP LEFT Diagonal
+            while (meowTile.X > x && meowTile.Y > y)
+            {
+                steps += 1;
+                x--;
+                y--;
+            }
+            // DOWN RIGHT Diagonal
+            while (meowTile.X < x && meowTile.Y < y)
+            {
+                steps += 1;
+                x++;
+                y++;
+            }
+            // UP RIGHT Diagonal
+            while (meowTile.X < x && meowTile.Y > y)
+            {
+                steps += 1;
+                x++;
+                y--;
+            }
+            // DOWN LEFT Diagonal
+            while (meowTile.X > x && meowTile.Y < y)
+            {
+                steps += 1;
+                x--;
+                y++;
+            }
+            // Remaining Manhattan distance
+            steps += Math.Abs(meowTile.X - x) + Math.Abs(meowTile.Y - y);
+
+            // Cat is close by
+            if (steps <= 7)
+            {
+                timeSinceLastMeow = 5;
+            }
         }
 
         public override List<Tile> GetNeighbors(Tile center)
