@@ -14,20 +14,16 @@ namespace Rongeurville
         {
         }
 
-        protected override void DoYourThings()
+        protected override Coordinates DoYourThings()
         {
             // Get closest rat
-            Tuple<Tile, int> aStarResult = GetDirection();
+            Tuple<Tile, int> searchResult = GetDirection();
             // MEOW
-            if (aStarResult.Item2 <= 10)
+            if (searchResult.Item2 <= 10)
             {
                 comm.ImmediateSend(new MeowRequest { Rank = rank }, 0, 0);
             }
-            //MoveRequest
-            //comm.ImmediateSend();
-            // Communicate intent with map
-            //string response;
-            //comm.SendReceive("PLEASE MOVE CAT (RANG) TO DEST (closestRat)", 0, 0, out response);
+            return searchResult.Item1.Position;
         }
 
         protected override void ListenMeow(Tile meowTile)

@@ -17,20 +17,16 @@ namespace Rongeurville
             timeSinceLastMeow = 0;
         }
 
-        protected override void DoYourThings()
+        protected override Coordinates DoYourThings()
         {
-            // TODO Listen for Meows <= 7 tiles from rat
-            //if meow -> time += 5
             Tuple<Tile, int> aStarResult = GetDirection();
-
-            // TODO Communicate intent with map
 
             // Be less scared
             if (timeSinceLastMeow > 0)
             {
                 timeSinceLastMeow -= 1;
             }
-            throw new NotImplementedException();
+            return aStarResult.Item1.Position;
         }
 
         protected override void ListenMeow(Tile meowTile)

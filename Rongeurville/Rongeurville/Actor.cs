@@ -19,7 +19,7 @@ namespace Rongeurville
 
         public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool IsGoal(Tile target);
-        protected abstract void DoYourThings();
+        protected abstract Coordinates DoYourThings();
         protected abstract void ListenMeow(Tile moewTile);
 
         public abstract TileContent GetTileContent();
@@ -121,7 +121,7 @@ namespace Rongeurville
         {
             while (!shouldDie)
             {
-                DoYourThings();
+                comm.ImmediateSend(new MoveRequest { Rank = rank, DesiredTile = DoYourThings() }, 0, 0);
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {
@@ -140,10 +140,10 @@ namespace Rongeurville
         private bool HandleMessage(Message message)
         {
             MoveSignal moveSignal = message as MoveSignal;
-            if (message != null)
+            if (moveSignal != null)
             {
-                //map. //TODO call l'application d'un mouvement sur la map
-                if (Equals(moveSignal.InitialTile, currentTile))
+                map.ApplyMove(moveSignal.InitialTile, moveSignal.FinalTile);
+                if (Equals(moveSignal.InitialTile, currentTile.Position))
                 {
                     currentTile = map.Tiles[moveSignal.FinalTile.Y, moveSignal.FinalTile.X];
                     return true;
@@ -152,13 +152,13 @@ namespace Rongeurville
             }
 
             MeowSignal meowSignal = message as MeowSignal;
-            if (message != null)
+            if (meowSignal != null)
             {
                 ListenMeow(map.Tiles[meowSignal.MeowLocation.Y, meowSignal.MeowLocation.X]);
                 return false;
             }
             KillSignal killSignal = message as KillSignal;
-            if (message != null)
+            if (killSignal != null)
             {
                 shouldDie = true;
                 return true;
