@@ -24,6 +24,10 @@ namespace Rongeurville
 
         public abstract TileContent GetTileContent();
 
+        /// <summary>
+        /// Constructor for Actor
+        /// </summary>
+        /// <param name="communicator">MPI Communicator</param>
         protected Actor(Intracommunicator communicator)
         {
             comm = communicator;
@@ -31,6 +35,9 @@ namespace Rongeurville
             shouldDie = false;
         }
 
+        /// <summary>
+        /// Start the alive process
+        /// </summary>
         public void Start()
         {
             map = comm.Receive<Map>(0, 0);
@@ -39,7 +46,7 @@ namespace Rongeurville
         }
 
         /// <summary>
-        /// Find the closest objective to go on.
+        /// Find the closest objective to go on. A* Pathfinding
         /// </summary>
         /// <returns>Next to tile to go on and the cost to go on that tile. Postion is null and cost is equal to NO_COST if path find.</returns>
         public Tuple<Coordinates, int> GetDirection()
@@ -108,12 +115,23 @@ namespace Rongeurville
             return new Tuple<Coordinates, int>(tileToGo?.Position, pathCost);
         }
 
+        /// <summary>
+        /// Determine if the tile is a target for the actor
+        /// </summary>
+        /// <param name="target">Target tile</param>
+        /// <returns>Tile is a goal for the actor</returns>
         private double GetEstimate(Tile target)
         {
             //We are using the Dijkstra, we each tile have an estimate of 1 except the goals
             return IsGoal(target) ? 0 : 1;
         }
 
+        /// <summary>
+        /// While the actor is alive:
+        ///     find a move position,
+        ///     update map with other actor's moves,
+        ///     and communicate move intentions with map
+        /// </summary>
         public void AliveLoop()
         {
             while (!shouldDie)
