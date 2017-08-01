@@ -110,6 +110,7 @@ namespace Rongeurville
 
         private double GetEstimate(Tile target)
         {
+            //We are using the Dijkstra, we each tile have an estimate of 1 except the goals
             return IsGoal(target) ? 0 : 1;
         }
 
