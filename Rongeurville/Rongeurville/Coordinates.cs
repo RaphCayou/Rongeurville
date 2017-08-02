@@ -12,7 +12,7 @@ namespace Rongeurville
         public int X;
         public int Y;
 
-        protected bool Equals(Coordinates other)
+        public bool Equals(Coordinates other)
         {
             return X == other.X && Y == other.Y;
         }

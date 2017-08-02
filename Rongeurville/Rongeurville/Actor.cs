@@ -169,7 +169,7 @@ namespace Rongeurville
             if (moveSignal != null)
             {
                 map.ApplyMove(moveSignal.InitialTile, moveSignal.FinalTile);
-                if (Equals(moveSignal.InitialTile, currentTile.Position))
+                if (moveSignal.InitialTile.Equals(currentTile.Position))
                 {
                     currentTile = map.Tiles[moveSignal.FinalTile.Y, moveSignal.FinalTile.X];
                     return true;
