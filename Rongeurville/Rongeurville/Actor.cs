@@ -115,6 +115,7 @@ namespace Rongeurville
                 while (lookingTile.Parent != null)
                 {
                     tileToGo = lookingTile.Value;
+                    lookingTile = lookingTile.Parent;
                 }
             }
 
