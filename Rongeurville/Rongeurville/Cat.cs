@@ -26,7 +26,7 @@ namespace Rongeurville
             // MEOW
             if (distanceToObjective <= 10)
             {
-                comm.ImmediateSend(new MeowRequest { Rank = rank }, 0, 0);
+                comm.Send(new MeowRequest { Rank = rank }, 0, 0);
             }
         }
 

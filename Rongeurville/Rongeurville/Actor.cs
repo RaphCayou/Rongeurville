@@ -147,8 +147,8 @@ namespace Rongeurville
                 MoveEvent(searchResult.Item2);
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position
-                    : searchResult.Item1; 
-                comm.ImmediateSend(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
+                    : searchResult.Item1;
+                comm.Send(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {
