@@ -209,7 +209,11 @@ namespace Rongeurville
                         X = j
                     };
 
-                    if (j >= lines[i].Length) continue;
+                    if (j >= lines[i].Length)
+                    {
+                        parsedMap.Tiles[i, j].Content = TileContent.Empty;
+                        continue;
+                    }
                     
                     // Parse tile content
                     parsedMap.Tiles[i, j].SetTileContent(lines[i][j]);
