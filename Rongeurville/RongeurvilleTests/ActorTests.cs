@@ -23,17 +23,40 @@ namespace RongeurvilleTests
         {
             Map mapTest = Map.ParseMap(TEST_MAP);
             Rat ratTest = new Rat();
+            Rat ratTest2 = new Rat();
+            Rat ratTest3 = new Rat();
             Cat catTest = new Cat();
+            Cat catTest2 = new Cat();
             ratTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(1));
+            ratTest2.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
+            ratTest3.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(3));
+            catTest2.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(4));
             catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(5));
             Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
+            Tuple<Coordinates, int> ratMove2 = ratTest2.GetDirection();
+            Tuple<Coordinates, int> ratMove3 = ratTest3.GetDirection();
             Tuple<Coordinates, int> catMove = catTest.GetDirection();
+            Tuple<Coordinates, int> catMove2 = catTest2.GetDirection();
+
             Assert.AreEqual(8, catMove.Item2);
             Assert.AreEqual(19, catMove.Item1.X);
             Assert.AreEqual(9, catMove.Item1.Y);
+
+            Assert.AreEqual(19, catMove2.Item2);
+            Assert.AreEqual(25, catMove2.Item1.X);
+            Assert.AreEqual(2, catMove2.Item1.Y);
+
             Assert.AreEqual(8, ratMove.Item2);
             Assert.AreEqual(41, ratMove.Item1.X);
             Assert.AreEqual(3, ratMove.Item1.Y);
+
+            Assert.AreEqual(8, ratMove2.Item2);
+            Assert.AreEqual(16, ratMove2.Item1.X);
+            Assert.AreEqual(4, ratMove2.Item1.Y);
+
+            Assert.AreEqual(7, ratMove3.Item2);
+            Assert.AreEqual(3, ratMove3.Item1.X);
+            Assert.AreEqual(7, ratMove3.Item1.Y);
         }
     }
 }
