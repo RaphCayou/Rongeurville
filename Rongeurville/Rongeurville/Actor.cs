@@ -63,43 +63,47 @@ namespace Rongeurville
             {
                 if (!openedTiles.Any())
                 {
-                    pathCost = NO_PATH;
-                    break;
-                }
-                openedTiles.Sort((tile1, tile2) => tile1.TotalCost().CompareTo(tile2.TotalCost()));
-                lookingTile = openedTiles[0];
-                openedTiles.RemoveAt(0);
-                if (IsGoal(lookingTile.Value))
-                {
                     pathFind = true;
-                    pathCost = lookingTile.CostSoFar;
+                    pathCost = NO_PATH;
                 }
-                closedTiles.Add(lookingTile);
-                foreach (Tile tile in GetNeighbors(lookingTile.Value))
+                else
                 {
-                    PathTile neighbor = new PathTile
+                    openedTiles.Sort((tile1, tile2) => tile1.TotalCost().CompareTo(tile2.TotalCost()));
+                    lookingTile = openedTiles[0];
+                    openedTiles.RemoveAt(0);
+                    if (IsGoal(lookingTile.Value))
                     {
-                        CostSoFar = lookingTile.CostSoFar + 1,
-                        Estimate = GetEstimate(tile),
-                        Value = tile,
-                        Parent = lookingTile
-                    };
-                    foreach (List<PathTile> pathTiles in new[] { openedTiles, closedTiles })
+                        pathFind = true;
+                        pathCost = lookingTile.CostSoFar;
+                    }
+                    closedTiles.Add(lookingTile);
+                    foreach (Tile tile in GetNeighbors(lookingTile.Value))
                     {
-                        PathTile inPathTile =
-                            pathTiles.FirstOrDefault(
-                                openTile => Equals(openTile.Value, neighbor.Value) &&
-                                            openTile.CostSoFar >= neighbor.CostSoFar);
-                        if (inPathTile != null)
+                        PathTile neighbor = new PathTile
                         {
-                            pathTiles.Remove(inPathTile);
+                            CostSoFar = lookingTile.CostSoFar + 1,
+                            Estimate = GetEstimate(tile),
+                            Value = tile,
+                            Parent = lookingTile
+                        };
+                        foreach (List<PathTile> pathTiles in new[] { openedTiles, closedTiles })
+                        {
+                            PathTile inPathTile =
+                                pathTiles.FirstOrDefault(
+                                    openTile => Equals(openTile.Value, neighbor.Value) &&
+                                                openTile.CostSoFar >= neighbor.CostSoFar);
+                            if (inPathTile != null)
+                            {
+                                pathTiles.Remove(inPathTile);
+                                openedTiles.Add(neighbor);
+                            }
+                        }
+                        if (!openedTiles.Contains(neighbor) && !closedTiles.Contains(neighbor))
+                        {
                             openedTiles.Add(neighbor);
                         }
                     }
-                    if (!openedTiles.Contains(neighbor) && !closedTiles.Contains(neighbor))
-                    {
-                        openedTiles.Add(neighbor);
-                    }
+
                 }
             }
             Tile tileToGo = null;
