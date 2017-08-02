@@ -10,7 +10,6 @@ namespace Rongeurville
     /// </summary>
     public class Rat : Actor
     {
-        private static readonly TileContent[] GO_THROUGH = {TileContent.Cheese, TileContent.Empty};
         private int timeSinceLastMeow;
 
         public Rat() : base()
@@ -64,19 +63,19 @@ namespace Rongeurville
             if (center.Y - 1 >= 0)
             {
                 // UP
-                if (GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X].Content))
+                if (CanGoToNeighbor(map.Tiles[center.Y - 1, center.X].Content))
                 {
                     neighbors.Add(map.Tiles[center.Y - 1, center.X]);
                 }
                 // UP LEFT
                 if (center.X - 1 >= 0 &&
-                    GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X - 1].Content))
+                    CanGoToNeighbor(map.Tiles[center.Y - 1, center.X - 1].Content))
                 {
                     neighbors.Add(map.Tiles[center.Y - 1, center.X - 1]);
                 }
                 // UP RIGHT
                 if (center.X + 1 < map.Width &&
-                    GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X + 1].Content))
+                    CanGoToNeighbor(map.Tiles[center.Y - 1, center.X + 1].Content))
                 {
                     neighbors.Add(map.Tiles[center.Y - 1, center.X + 1]);
                 }
@@ -85,35 +84,45 @@ namespace Rongeurville
             if (center.Y + 1 < map.Height)
             {
                 // DOWN
-                if (GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X].Content))
+                if (CanGoToNeighbor(map.Tiles[center.Y + 1, center.X].Content))
                 {
                     neighbors.Add(map.Tiles[center.Y + 1, center.X]);
                 }
                 // DOWN LEFT
-                if (center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X - 1].Content))
+                if (center.X - 1 >= 0 && CanGoToNeighbor(map.Tiles[center.Y + 1, center.X - 1].Content))
                 {
                     neighbors.Add(map.Tiles[center.Y + 1, center.X - 1]);
                 }
                 // DOWN RIGHT
-                if (center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X + 1].Content))
+                if (center.X + 1 < map.Width && CanGoToNeighbor(map.Tiles[center.Y + 1, center.X + 1].Content))
                 {
                     neighbors.Add(map.Tiles[center.Y + 1, center.X + 1]);
                 }
             }
 
             // LEFT
-            if (center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y, center.X - 1].Content))
+            if (center.X - 1 >= 0 && CanGoToNeighbor(map.Tiles[center.Y, center.X - 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y, center.X - 1]);
             }
 
             // RIGHT
-            if (center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y, center.X + 1].Content))
+            if (center.X + 1 < map.Width && CanGoToNeighbor(map.Tiles[center.Y, center.X + 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y, center.X + 1]);
             }
 
             return neighbors;
+        }
+
+        /// <summary>
+        /// Determine whether the rat can move to the tile
+        /// </summary>
+        /// <param name="content">Target tile to check for valid move</param>
+        /// <returns>Cat can move to the tile</returns>
+        public override bool CanGoToNeighbor(TileContent content)
+        {
+            return content == TileContent.Cheese || content == TileContent.Empty;
         }
 
         /// <summary>

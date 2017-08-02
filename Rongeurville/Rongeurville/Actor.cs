@@ -19,6 +19,7 @@ namespace Rongeurville
         protected bool shouldDie;
 
         public abstract List<Tile> GetNeighbors(Tile center);
+        public abstract bool CanGoToNeighbor(TileContent content);
         public abstract bool IsGoal(Tile target);
         protected abstract void MoveEvent(int distanceToObjective);
         protected abstract void ListenMeow(Tile moewTile);

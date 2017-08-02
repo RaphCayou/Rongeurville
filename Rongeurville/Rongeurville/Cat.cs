@@ -51,29 +51,42 @@ namespace Rongeurville
         public override List<Tile> GetNeighbors(Tile center)
         {
             List<Tile> neighbors = new List<Tile>();
+
             // UP
-            if (center.Y - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X].Content))
+            if (center.Y - 1 >= 0 && CanGoToNeighbor(map.Tiles[center.Y - 1, center.X].Content))
             {
                 neighbors.Add(map.Tiles[center.Y - 1, center.X]);
             }
+
             // DOWN
-            if (center.Y + 1 < map.Height && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X].Content))
+            if (center.Y + 1 < map.Height && CanGoToNeighbor(map.Tiles[center.Y + 1, center.X].Content))
             {
                 neighbors.Add(map.Tiles[center.Y + 1, center.X]);
             }
 
             // LEFT
-            if (center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y, center.X - 1].Content))
+            if (center.X - 1 >= 0 && CanGoToNeighbor(map.Tiles[center.Y, center.X - 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y, center.X - 1]);
             }
 
             // RIGHT
-            if (center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y, center.X + 1].Content))
+            if (center.X + 1 < map.Width && CanGoToNeighbor(map.Tiles[center.Y, center.X + 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y, center.X + 1]);
             }
+
             return neighbors;
+        }
+
+        /// <summary>
+        /// Determine whether the cat can move to the tile
+        /// </summary>
+        /// <param name="content">Target tile to check for valid move</param>
+        /// <returns>Cat can move to the tile</returns>
+        public override bool CanGoToNeighbor(TileContent content)
+        {
+            return content == TileContent.Rat || content == TileContent.Empty;
         }
 
         /// <summary>
