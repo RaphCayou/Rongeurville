@@ -40,6 +40,14 @@ namespace Rongeurville
                 return false; // destination not part of the map
             }
 
+            int verticalDistance = Math.Abs(destination.Y - source.Y);
+            int horizontalDistance = Math.Abs(destination.X - source.X);
+
+            if (verticalDistance > 1 || horizontalDistance > 1)
+            {
+                return false; // Cannot move more that 2 tiles in a given direction
+            }
+
             Tile sourceTile = GetTileByCoordinates(source);
             Tile destinationTile = GetTileByCoordinates(destination);
 
@@ -60,9 +68,17 @@ namespace Rongeurville
                 return false; // Rats can only go on a Cheese or an empty tile
             }
 
-            if (sourceTile.Content == TileContent.Cat && (destinationTile.Content & (TileContent.Rat | TileContent.Empty)) == 0)
+            if (sourceTile.Content == TileContent.Cat)
             {
-                return false; // Cats can only go on a Rat or an empty tile
+                if (verticalDistance == horizontalDistance && verticalDistance == 1)
+                {
+                    return false; // Cats cannot move in diagonal pattern
+                }
+
+                if ((destinationTile.Content & (TileContent.Rat | TileContent.Empty)) == 0)
+                {
+                    return false; // Cats can only go on a Rat or an empty tile
+                }
             }
 
             return true;

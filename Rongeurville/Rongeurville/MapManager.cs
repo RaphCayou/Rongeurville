@@ -214,6 +214,7 @@ namespace Rongeurville
 
                 // Move is valid and the destination tile no longer has important information
                 map.ApplyMove(sender.Position, moveRequest.DesiredTile);
+                sender.Position = moveRequest.DesiredTile;
                 moveSignal.FinalTile = moveRequest.DesiredTile;
             }
             else
