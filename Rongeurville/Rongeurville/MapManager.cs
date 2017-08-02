@@ -195,7 +195,7 @@ namespace Rongeurville
             MoveEffect effect = map.CheckForMoveEffects(sender.Position, moveRequest.DesiredTile);
             if (effect != MoveEffect.InvalidMove)
             {
-                logger.LogMove(sender.Rank, true);
+                logger.LogMove(sender.Rank, true, sender.Position, moveRequest.DesiredTile);
                 switch (effect)
                 {
                     case MoveEffect.RatCaptured:
@@ -218,7 +218,7 @@ namespace Rongeurville
             }
             else
             {
-                logger.LogMove(sender.Rank, false);
+                logger.LogMove(sender.Rank, false, sender.Position, moveRequest.DesiredTile);
             }
 
             if (IsGameOver())
