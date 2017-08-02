@@ -10,8 +10,12 @@ namespace Rongeurville
     /// </summary>
     public class Rat : Actor
     {
-        private static readonly TileContent[] GO_THROUGH = { TileContent.Cheese, TileContent.Empty };
+        private static readonly TileContent[] GO_THROUGH = {TileContent.Cheese, TileContent.Empty};
         private int timeSinceLastMeow;
+
+        public Rat() : base()
+        {
+        }
 
         /// <summary>
         /// Constructor for Rat actor
@@ -98,12 +102,14 @@ namespace Rongeurville
                 neighbors.Add(map.Tiles[center.Y - 1, center.X]);
             }
             // UP LEFT
-            if (center.Y - 1 >= 0 && center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X - 1].Content))
+            if (center.Y - 1 >= 0 && center.X - 1 >= 0 &&
+                GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X - 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y - 1, center.X - 1]);
             }
             // UP RIGHT
-            if (center.Y - 1 >= 0 && center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X + 1].Content))
+            if (center.Y - 1 >= 0 && center.X + 1 < map.Width &&
+                GO_THROUGH.Contains(map.Tiles[center.Y - 1, center.X + 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y - 1, center.X + 1]);
             }
@@ -114,12 +120,14 @@ namespace Rongeurville
                 neighbors.Add(map.Tiles[center.Y + 1, center.X]);
             }
             // DOWN LEFT
-            if (center.Y + 1 < map.Height && center.X - 1 >= 0 && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X - 1].Content))
+            if (center.Y + 1 < map.Height && center.X - 1 >= 0 &&
+                GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X - 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y + 1, center.X - 1]);
             }
             // DOWN RIGHT
-            if (center.Y + 1 < map.Height && center.X + 1 < map.Width && GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X + 1].Content))
+            if (center.Y + 1 < map.Height && center.X + 1 < map.Width &&
+                GO_THROUGH.Contains(map.Tiles[center.Y + 1, center.X + 1].Content))
             {
                 neighbors.Add(map.Tiles[center.Y + 1, center.X + 1]);
             }

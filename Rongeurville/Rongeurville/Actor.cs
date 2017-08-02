@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using MPI;
 using Rongeurville.Communication;
 
@@ -24,6 +25,11 @@ namespace Rongeurville
 
         public abstract TileContent GetTileContent();
 
+        protected Actor()
+        {
+            shouldDie = false;
+        }
+
         /// <summary>
         /// Constructor for Actor
         /// </summary>
@@ -45,6 +51,12 @@ namespace Rongeurville
             map = mapReceived.Map;
             currentTile = map.GetCurrentTileByRank(rank);
             AliveLoop();
+        }
+
+        public void SetMapAndCurrentTile(Map newMap, Tile newCurrentTile)
+        {
+            this.currentTile = newCurrentTile;
+            this.map = newMap;
         }
 
         /// <summary>

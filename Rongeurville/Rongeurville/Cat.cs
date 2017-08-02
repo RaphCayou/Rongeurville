@@ -9,6 +9,10 @@ namespace Rongeurville
     {
         private static readonly TileContent[] GO_THROUGH = { TileContent.Rat, TileContent.Empty };
 
+        public Cat() : base()
+        {
+        }
+
         /// <summary>
         /// Constructor for Cat actor
         /// </summary>
