@@ -129,10 +129,20 @@ namespace Rongeurville
             switch (destinationTile.Content)
             {
                 case TileContent.Cheese:
-                    Cheese.Remove(destinationTile);
+                    Cheese.RemoveAll(tile => tile.Position.Equals(destination));
                     break;
                 case TileContent.Rat:
-                    Rats.Remove(destinationTile);
+                    Rats.RemoveAll(tile => tile.Position.Equals(destination));
+                    break;
+            }
+
+            switch (sourceTile.Content)
+            {
+                case TileContent.Cat:
+                    Cats[Cats.FindIndex(tile => tile.Equals(sourceTile))] = destinationTile;
+                    break;
+                case TileContent.Rat:
+                    Rats[Rats.FindIndex(tile => tile.Equals(sourceTile))] = destinationTile;
                     break;
             }
 
