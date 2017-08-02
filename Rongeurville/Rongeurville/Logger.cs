@@ -47,8 +47,8 @@ namespace Rongeurville
         {
             // TODO Delete this, for debug purpose only
             Log(accepted
-                ? $"+ The {getType(rank)} #{rank} moves from {from} to {to}"
-                : $"- The {getType(rank)} #{rank} tried to move from {from} to {to}");
+                ? $"[Move Accepted] The {getType(rank)} #{rank} moves from {from} to {to}"
+                : $"[Move Rejected] The {getType(rank)} #{rank} tried to move from {from} to {to}");
 
             if (!moves.ContainsKey(rank))
             {
