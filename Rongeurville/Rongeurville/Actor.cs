@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Permissions;
 using MPI;
+using Priority_Queue;
 using Rongeurville.Communication;
 
 namespace Rongeurville
@@ -152,6 +153,45 @@ namespace Rongeurville
             return new Tuple<Coordinates, int>(tileToGo?.Position, pathCost);
         }
 
+        //http://www.redblobgames.com/pathfinding/a-star/introduction.html Python -> C#
+        public Tuple<Coordinates, int> GetDirection(bool isThisDijkstraBetter)
+        {
+            SimplePriorityQueue<Tile> frontier = new SimplePriorityQueue<Tile>();
+            frontier.Enqueue(currentTile, 0);
+            Dictionary<Tile, Tile> came_from = new Dictionary<Tile, Tile>();
+            Dictionary<Tile, int> cost_so_far = new Dictionary<Tile, int> {{currentTile,0}};
+            Tile current = currentTile, last = currentTile;
+
+            while (frontier.Count != 0)
+            {
+                current = frontier.Dequeue();
+
+                if (IsGoal(current))
+                    break;
+
+                foreach (Tile next in GetNeighbors(current))
+                {
+                    int newCost = cost_so_far[current] + 1;
+                    if (!cost_so_far.ContainsKey(next) || newCost < cost_so_far[next])
+                    {
+                        cost_so_far[next] = newCost;
+                        frontier.Enqueue(next, newCost);
+                        came_from[next] = current;
+                    }
+                }
+            }
+
+            int cost = 0;
+            while (!current.Equals(currentTile))
+            {
+                cost++;
+                last = current;
+                current = came_from[current];
+            }
+
+            return Tuple.Create(last.Position, cost);
+        }
+
         /// <summary>
         /// Determine if the tile is a target for the actor
         /// </summary>
@@ -175,7 +215,7 @@ namespace Rongeurville
             //Console.WriteLine("Actor is Alive" + rank);
             while (!shouldDie)
             {
-                Tuple<Coordinates, int> searchResult = GetDirection();
+                Tuple<Coordinates, int> searchResult = GetDirection(true);
                 MoveEvent(searchResult.Item2);
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position
