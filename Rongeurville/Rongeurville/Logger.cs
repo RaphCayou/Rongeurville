@@ -20,6 +20,10 @@ namespace Rongeurville
             this.getType = getType;
             this.filename = filename;
             moves = new Dictionary<int, Pair>();
+
+            // Clean the log file
+            if (File.Exists(filename))
+                File.Delete(filename);
         }
 
         private void Log(string text)

@@ -2,6 +2,7 @@
 using Rongeurville.Communication;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ namespace Rongeurville
     {
         private Map map;
         private Intracommunicator comm;
+        private Logger logger;
+        private Stopwatch stopwatch;
 
         private ActorProcess[] rats;
         private ActorProcess[] cats;
@@ -47,7 +50,8 @@ namespace Rongeurville
 
             InitActorProcesses();
 
-            Logger l = new Logger(rank =>
+            // Logger
+            logger = new Logger(rank =>
             {
                 if (rank == 0)
                     return ProcessType.Map;
@@ -55,12 +59,7 @@ namespace Rongeurville
                     return ProcessType.Rat;
                 return ProcessType.Cat;
             });
-            l.LogMap(map.ToString());
-            l.LogCheeseConsumption(3, new Coordinates());
-            l.LogMove(1, true);
-            l.LogMove(1, false);
-            l.LogMove(2, true);
-            l.LogExecutionTime(1234);
+            stopwatch = new Stopwatch();
         }
 
         /// <summary>
@@ -94,7 +93,6 @@ namespace Rongeurville
             {
                 comm.Send(message, actor.Rank, 0);
             }
-
             foreach (ActorProcess actor in rats)
             {
                 comm.Send(message, actor.Rank, 0);
@@ -103,6 +101,8 @@ namespace Rongeurville
 
         public void Start()
         {
+            stopwatch.Start();
+
             // Send map to everyone and start the game
             StartSignal startSignal = new StartSignal { Map = map };
             comm.Broadcast(ref startSignal, 0);
@@ -112,6 +112,9 @@ namespace Rongeurville
                 // Treat all message for as long as the execution is supposed to continue
                 HandleMessageReceive();
             }
+
+            stopwatch.Stop();
+            logger.LogExecutionTime((int)stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>
