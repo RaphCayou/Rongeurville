@@ -76,6 +76,5 @@ namespace Rongeurville
         {
             Log(map);
         }
-
     }
 }

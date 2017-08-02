@@ -120,12 +120,8 @@ namespace Rongeurville
         /// </summary>
         private void HandleMessageReceive()
         {
-            Console.WriteLine("allo");
-
             // Receive next message and handle it
             Message message = comm.Receive<Message>(Communicator.anySource, 0);
-
-            Console.WriteLine(message.GetType().Name);
 
             Communication.Request request = message as Communication.Request;
             if (request != null)
@@ -199,16 +195,20 @@ namespace Rongeurville
             MoveEffect effect = map.CheckForMoveEffects(sender.Position, moveRequest.DesiredTile);
             if (effect != MoveEffect.InvalidMove)
             {
+                logger.LogMove(sender.Rank, true);
                 switch (effect)
                 {
                     case MoveEffect.RatCaptured:
-                        HandleRatRemoval(GetActorProcessByCoordinates(moveRequest.DesiredTile));
+                        ActorProcess rat = GetActorProcessByCoordinates(moveRequest.DesiredTile);
+                        logger.LogCaptureRat(rat.Rank, sender.Rank);
+                        HandleRatRemoval(rat);
                         break;
                     case MoveEffect.RatEscaped:
+                        logger.LogExitRat(sender.Rank, moveRequest.DesiredTile);
                         HandleRatRemoval(GetActorProcessByCoordinates(sender.Position));
                         break;
                     case MoveEffect.CheeseEaten:
-                        // TODO log this
+                        logger.LogCheeseConsumption(sender.Rank, moveRequest.DesiredTile);
                         break;
                 }
 
@@ -216,7 +216,11 @@ namespace Rongeurville
                 map.ApplyMove(sender.Position, moveRequest.DesiredTile);
                 moveSignal.FinalTile = moveRequest.DesiredTile;
             }
-            
+            else
+            {
+                logger.LogMove(sender.Rank, false);
+            }
+
             if (IsGameOver())
             {
                 // Signal to everyone that the game is over and they should stop.
@@ -259,6 +263,7 @@ namespace Rongeurville
         /// <param name="sender"></param>
         private void HandleMeow(MeowRequest meowRequest, ActorProcess sender)
         {
+            logger.LogMeow(sender.Rank, sender.Position);
             MeowSignal meowSignal = new MeowSignal { MeowLocation = sender.Position };
             Broadcast(meowSignal);
         }
