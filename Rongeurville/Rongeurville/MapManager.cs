@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static Rongeurville.Map;
 
@@ -44,21 +45,7 @@ namespace Rongeurville
                 throw new Exception("Rat or cat counts does not match with map loaded.");
             }
 
-            int count = 0;
-            rats = map.Rats.Select(t => new ActorProcess
-            {
-                Rank = ++count,
-                IsDeadProcess = false,
-                Position = t.Position
-            }).ToArray();
-
-            cats = map.Cats.Select(t => new ActorProcess
-            {
-                Rank = ++count,
-                IsDeadProcess = false,
-                Position = t.Position
-            }).ToArray();
-
+            InitActorProcesses();
 
             Logger l = new Logger(rank =>
             {
@@ -74,6 +61,44 @@ namespace Rongeurville
             l.LogMove(1, false);
             l.LogMove(2, true);
             l.LogExecutionTime(1234);
+        }
+
+        /// <summary>
+        /// Initialize ActorProcess lists for rats and cats
+        /// </summary>
+        private void InitActorProcesses()
+        {
+            int count = 0;
+            rats = map.Rats.Select(t => new ActorProcess
+            {
+                Rank = ++count,
+                IsDeadProcess = false,
+                Position = t.Position
+            }).ToArray();
+
+            cats = map.Cats.Select(t => new ActorProcess
+            {
+                Rank = ++count,
+                IsDeadProcess = false,
+                Position = t.Position
+            }).ToArray();
+        }
+
+        /// <summary>
+        /// Broadcast a message to all actors as if the message was directly aimed at them
+        /// </summary>
+        /// <param name="message"></param>
+        private void Broadcast(Message message)
+        {
+            foreach (ActorProcess actor in cats)
+            {
+                comm.Send(message, actor.Rank, 0);
+            }
+
+            foreach (ActorProcess actor in rats)
+            {
+                comm.Send(message, actor.Rank, 0);
+            }
         }
 
         public void Start()
@@ -104,57 +129,59 @@ namespace Rongeurville
             Communication.Request request = message as Communication.Request;
             if (request != null)
             {
-                ActorProcess sender = GetActorProcessByRank(request.Rank);
-
-                // Death confirmation
-                DeathConfirmation deathConfirmation = message as DeathConfirmation;
-                if (deathConfirmation != null)
-                {
-                    HandleDeath(deathConfirmation, sender);
-
-                    // TODO Change this for a count of the number of death processes 
-                    if (AreAllActorsFinished())
-                    {
-                        // Stop the MapManager
-                        ContinueExecution = false;
-                    }
-
-                    return;
-                }
-
-                // Validate that the process is still in the game (playing).
-                // This is meant to deny requests that were sent in between the moment the actor was removed from the game and the moment the actor learned about it.
-                if (!sender.Playing)
-                {
-                    return; // Ignore the message, the process is no longer playing
-                }
-
-                // Move request
-                MoveRequest moveRequest = message as MoveRequest;
-                if (moveRequest != null)
-                {
-                    HandleMovePlayer(moveRequest, sender);
-
-                    return;
-                }
-
-                // Meow request
-                MeowRequest meowRequest = message as MeowRequest;
-                if (meowRequest != null)
-                {
-                    HandleMeow(meowRequest, sender);
-
-                    return;
-                }
-                
-                // TODO At this point, this is an unsupported request, log it
-
+                HandleRequest(request);
             }
             else
             {
                 // TODO This is an invalid message, only request are accepted, log it
 
             }
+        }
+
+        /// <summary>
+        /// Handle a request message 
+        /// </summary>
+        /// <param name="request"></param>
+        private void HandleRequest(Communication.Request request)
+        {
+            ActorProcess sender = GetActorProcessByRank(request.Rank);
+
+            // Death confirmation
+            DeathConfirmation deathConfirmation = request as DeathConfirmation;
+            if (deathConfirmation != null)
+            {
+                HandleDeath(deathConfirmation, sender);
+
+                return;
+            }
+
+            // Validate that the process is still in the game (playing).
+            // This is meant to deny requests that were sent in between the moment the actor was removed from the game and the moment the actor learned about it.
+            if (!sender.Playing)
+            {
+                return; // Ignore the message, the process is no longer playing
+            }
+
+            // Move request
+            MoveRequest moveRequest = request as MoveRequest;
+            if (moveRequest != null)
+            {
+                HandleMovePlayer(moveRequest, sender);
+
+                return;
+            }
+
+            // Meow request
+            MeowRequest meowRequest = request as MeowRequest;
+            if (meowRequest != null)
+            {
+                HandleMeow(meowRequest, sender);
+
+                return;
+            }
+
+            // TODO At this point, this is an unsupported request, log it
+
         }
 
         /// <summary>
@@ -179,6 +206,9 @@ namespace Rongeurville
                     case MoveEffect.RatEscaped:
                         HandleRatRemoval(GetActorProcessByCoordinates(sender.Position));
                         break;
+                    case MoveEffect.CheeseEaten:
+                        // TODO log this
+                        break;
                 }
 
                 // Move is valid and the destination tile no longer has important information
@@ -186,17 +216,26 @@ namespace Rongeurville
                 moveSignal.FinalTile = moveRequest.DesiredTile;
             }
             
-            if (map.Cheese.Count == 0 || map.Rats.Count == 0)
+            if (IsGameOver())
             {
                 // Signal to everyone that the game is over and they should stop.
                 KillSignal killSignal = new KillSignal();
-                comm.Broadcast(ref killSignal, 0);
+                Broadcast(killSignal);
             }
             else
             {
                 // Broadcast the result of the move
                 comm.Broadcast(ref moveSignal, 0);
             }
+        }
+
+        /// <summary>
+        /// Check if the game is over (cat or rat win)
+        /// </summary>
+        /// <returns></returns>
+        private bool IsGameOver()
+        {
+            return map.Cheese.Count == 0 || map.Rats.Count == 0;
         }
 
         /// <summary>
@@ -220,7 +259,7 @@ namespace Rongeurville
         private void HandleMeow(MeowRequest meowRequest, ActorProcess sender)
         {
             MeowSignal meowSignal = new MeowSignal { MeowLocation = sender.Position };
-            comm.Broadcast(ref meowSignal, 0);
+            Broadcast(meowRequest);
         }
 
         /// <summary>
@@ -232,6 +271,13 @@ namespace Rongeurville
         {
             ActorProcess dyingActorProcess = GetActorProcessByRank(deathConfirmation.Rank);
             dyingActorProcess.IsDeadProcess = true;
+
+            // TODO Change this for a count of the number of death processes 
+            if (AreAllActorsFinished())
+            {
+                // Stop the MapManager
+                ContinueExecution = false;
+            }
         }
 
         /// <summary>
@@ -250,12 +296,17 @@ namespace Rongeurville
         /// <returns></returns>
         private ActorProcess GetActorProcessByRank(int rank)
         {
-            return cats.First(c => c.Rank == rank) ?? rats.First(r => r.Rank == rank);
+            return cats.FirstOrDefault(c => c.Rank == rank) ?? rats.FirstOrDefault(r => r.Rank == rank);
         }
 
+        /// <summary>
+        /// Get the ActorProcess linked to the coordinates
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
         private ActorProcess GetActorProcessByCoordinates(Coordinates position)
         {
-            return cats.First(c => c.Position.Equals(position)) ?? rats.First(r => r.Position.Equals(position));
+            return cats.FirstOrDefault(c => c.Position.Equals(position)) ?? rats.FirstOrDefault(r => r.Position.Equals(position));
         }
     }
 }
