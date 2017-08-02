@@ -225,7 +225,7 @@ namespace Rongeurville
             else
             {
                 // Broadcast the result of the move
-                comm.Broadcast(ref moveSignal, 0);
+                Broadcast(moveSignal);
             }
         }
 
