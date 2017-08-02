@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Rongeurville
 {
@@ -26,19 +27,19 @@ namespace Rongeurville
                 File.Delete(filename);
         }
 
-        private void Log(string text)
+        private void Log(string text, bool appendDate = true)
         {
-            File.AppendAllText(filename, text + Environment.NewLine);
+            File.AppendAllText(filename, $"{(appendDate? $"[{DateTime.Now:HH:mm:ss}] " : "")}{text}{Environment.NewLine}");
         }
         public void LogExecutionTime(int ms)
         {
             Log("====================================================");
             Log("=====================Statistics=====================");
             Log("====================================================");
-            foreach (var move in moves)
+            foreach (var move in moves.OrderBy(m => m.Key))
             {
                 Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} request {move.Value.NbrAccepted + move.Value.NbrRejected} moves");
-                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has a proportion of {move.Value.NbrAccepted / (double)(move.Value.NbrAccepted + move.Value.NbrRejected)} accepted moves");
+                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has a proportion of {move.Value.NbrAccepted / (double)(move.Value.NbrAccepted + move.Value.NbrRejected)}/1 accepted moves");
             }
             Log($"Total execution time : {ms} ms");
         }
@@ -46,8 +47,8 @@ namespace Rongeurville
         {
             // TODO Delete this, for debug purpose only
             Log(accepted
-                ? $"+ The {getType(rank)} #{rank} moves from {from} to {to}"
-                : $"- The {getType(rank)} #{rank} tried to move from {from} to {to}");
+                ? $"[Move Accepted] The {getType(rank)} #{rank} moves from {from} to {to}"
+                : $"[Move Rejected] The {getType(rank)} #{rank} tried to move from {from} to {to}");
 
             if (!moves.ContainsKey(rank))
             {
@@ -79,7 +80,7 @@ namespace Rongeurville
         }
         public void LogMap(string map)
         {
-            Log(map);
+            Log(map, false);
         }
     }
 }

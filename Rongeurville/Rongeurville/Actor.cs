@@ -13,12 +13,15 @@ namespace Rongeurville
         protected int rank;
 
         protected Tile currentTile;
+        public Tile CurrentTile => currentTile;
 
         protected Map map;
         protected Intracommunicator comm;
         protected bool shouldDie;
 
+
         public abstract List<Tile> GetNeighbors(Tile center);
+        public abstract bool CanGoToNeighbor(TileContent content);
         public abstract bool IsGoal(Tile target);
         protected abstract void MoveEvent(int distanceToObjective);
         protected abstract void ListenMeow(Tile moewTile);
@@ -36,6 +39,7 @@ namespace Rongeurville
         /// <param name="communicator">MPI Communicator</param>
         protected Actor(Intracommunicator communicator)
         {
+            //Console.WriteLine("Constructing Actor");
             comm = communicator;
             rank = comm.Rank;
             shouldDie = false;
@@ -46,9 +50,14 @@ namespace Rongeurville
         /// </summary>
         public void Start()
         {
+            //Console.WriteLine("Starting Actor" + rank);
             StartSignal mapReceived = new StartSignal();
             comm.Broadcast(ref mapReceived, 0);
             map = mapReceived.Map;
+            //Console.WriteLine(map);
+
+            //map = comm.Receive<StartSignal>(0, 0).Map;
+            //Console.WriteLine("Map received in Actor" + rank);
             currentTile = map.GetCurrentTileByRank(rank);
             AliveLoop();
         }
@@ -65,6 +74,8 @@ namespace Rongeurville
         /// <returns>Next to tile to go on and the cost to go on that tile. Postion is null and cost is equal to NO_COST if path find.</returns>
         public Tuple<Coordinates, int> GetDirection()
         {
+
+            //Console.WriteLine("Actor is getting a direction" + rank);
             PathTile lookingTile =
                 new PathTile { CostSoFar = 0, Estimate = GetEstimate(currentTile), Value = currentTile };
             bool pathFind = false;
@@ -79,6 +90,7 @@ namespace Rongeurville
                 {
                     pathFind = true;
                     pathCost = NO_PATH;
+                    //Console.WriteLine("Actor did not find a direction." + rank);
                 }
                 else
                 {
@@ -90,31 +102,36 @@ namespace Rongeurville
                         pathFind = true;
                         pathCost = lookingTile.CostSoFar;
                     }
-                    closedTiles.Add(lookingTile);
-                    foreach (Tile tile in GetNeighbors(lookingTile.Value))
+                    else
                     {
-                        PathTile neighbor = new PathTile
+                        closedTiles.Add(lookingTile);
+                        foreach (Tile tile in GetNeighbors(lookingTile.Value))
                         {
-                            CostSoFar = lookingTile.CostSoFar + 1,
-                            Estimate = GetEstimate(tile),
-                            Value = tile,
-                            Parent = lookingTile
-                        };
-                        foreach (List<PathTile> pathTiles in new[] { openedTiles, closedTiles })
-                        {
-                            PathTile inPathTile =
-                                pathTiles.FirstOrDefault(
-                                    openTile => Equals(openTile.Value, neighbor.Value) &&
-                                                openTile.CostSoFar >= neighbor.CostSoFar);
-                            if (inPathTile != null)
+                            PathTile neighbor = new PathTile
                             {
-                                pathTiles.Remove(inPathTile);
+                                CostSoFar = lookingTile.CostSoFar + 1,
+                                Estimate = GetEstimate(tile),
+                                Value = tile,
+                                Parent = lookingTile
+                            };
+                            //Console.WriteLine($"Testing the tile x:{neighbor.Value.X} Y:{neighbor.Value.Y} and the cost:{neighbor.CostSoFar}, {neighbor.Estimate}");
+                            foreach (List<PathTile> pathTiles in new[] { openedTiles, closedTiles })
+                            {
+                                PathTile inPathTile =
+                                    pathTiles.FirstOrDefault(
+                                        openTile => openTile.Value.Equals(neighbor.Value) &&
+                                                    openTile.CostSoFar >= neighbor.CostSoFar);
+                                if (inPathTile != null)
+                                {
+                                    //Console.WriteLine($"The new tile is better.Old:{inPathTile.Value.X}x{inPathTile.Value.Y} cost:{inPathTile.TotalCost()} New:{neighbor.Value.X}x{neighbor.Value.Y} cost:{neighbor.TotalCost()}");
+                                    pathTiles.RemoveAll(pathTile =>pathTile.Value.Equals(inPathTile.Value));
+                                    openedTiles.Add(neighbor);
+                                }
+                            }
+                            if (!openedTiles.Contains(neighbor) && !closedTiles.Contains(neighbor))
+                            {
                                 openedTiles.Add(neighbor);
                             }
-                        }
-                        if (!openedTiles.Contains(neighbor) && !closedTiles.Contains(neighbor))
-                        {
-                            openedTiles.Add(neighbor);
                         }
                     }
 
@@ -131,6 +148,7 @@ namespace Rongeurville
                 }
             }
 
+            //Console.WriteLine($"{rank} Actor at {currentTile.Position} got a direction {tileToGo?.Position} in {closedTiles.Count} with the cost {pathCost}  " + rank);
             return new Tuple<Coordinates, int>(tileToGo?.Position, pathCost);
         }
 
@@ -153,6 +171,8 @@ namespace Rongeurville
         /// </summary>
         public void AliveLoop()
         {
+
+            //Console.WriteLine("Actor is Alive" + rank);
             while (!shouldDie)
             {
                 Tuple<Coordinates, int> searchResult = GetDirection();
@@ -160,13 +180,16 @@ namespace Rongeurville
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position
                     : searchResult.Item1;
+                //Console.WriteLine("Actor is sending Move" + rank);
                 comm.Send(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {
+                    //Console.WriteLine("Actor is receiving Move" + rank);
                     Message message = comm.Receive<Message>(0, 0);
                     waitingMoveResponse = !HandleMessage(message);
                 }
+                //Console.WriteLine("Actor as received is Move" + rank);
             }
             comm.Send(new DeathConfirmation { Rank = rank }, 0, 0);
         }
@@ -182,8 +205,10 @@ namespace Rongeurville
             if (moveSignal != null)
             {
                 map.ApplyMove(moveSignal.InitialTile, moveSignal.FinalTile);
+                //Console.WriteLine($"{rank} Receive move: initial: {moveSignal.InitialTile.X} x {moveSignal.InitialTile.Y} target : {moveSignal.FinalTile.X} x {moveSignal.FinalTile.Y} current position {currentTile.X} x {currentTile.Y}");
                 if (moveSignal.InitialTile.Equals(currentTile.Position))
                 {
+                    //Console.WriteLine("Actor got is new postion " + rank);
                     currentTile = map.Tiles[moveSignal.FinalTile.Y, moveSignal.FinalTile.X];
                     return true;
                 }
