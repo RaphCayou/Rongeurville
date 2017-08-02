@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rongeurville
 {
+    [Serializable]
     public class Coordinates
     {
         public int X;

@@ -1,5 +1,8 @@
-﻿namespace Rongeurville
+﻿using System;
+
+namespace Rongeurville
 {
+    [Serializable]
     public enum TileContent
     {
         Empty = 0,
@@ -9,6 +12,7 @@
         Rat = 8,
     }
 
+    [Serializable]
     public class Tile
     {
         public Coordinates Position = new Coordinates();

@@ -8,6 +8,7 @@ using System.IO;
 
 namespace Rongeurville
 {
+    [Serializable]
     public class Map
     {
         public int Height { get; private set; }

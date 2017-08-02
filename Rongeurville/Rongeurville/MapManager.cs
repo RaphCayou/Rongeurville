@@ -94,8 +94,12 @@ namespace Rongeurville
         /// </summary>
         private void HandleMessageReceive()
         {
+            Console.WriteLine("allo");
+
             // Receive next message and handle it
             Message message = comm.Receive<Message>(Communicator.anySource, 0);
+
+            Console.WriteLine(message.GetType().Name);
 
             Communication.Request request = message as Communication.Request;
             if (request != null)
