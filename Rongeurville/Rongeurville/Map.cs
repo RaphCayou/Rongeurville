@@ -65,8 +65,7 @@ namespace Rongeurville
                 return false; // Cats can only go on a Rat or an empty tile
             }
 
-            // We are trying to move something else than a rat or a cat. Impossible, do not allow it.
-            return false;
+            return true;
         }
 
         public enum MoveEffect

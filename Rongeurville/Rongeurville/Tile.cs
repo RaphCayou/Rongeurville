@@ -5,11 +5,11 @@ namespace Rongeurville
     [Serializable]
     public enum TileContent
     {
-        Empty = 0,
-        Wall = 1,
-        Cheese = 2,
-        Cat = 4,
-        Rat = 8,
+        Empty = 1,
+        Wall = 2,
+        Cheese = 4,
+        Cat = 8,
+        Rat = 16,
     }
 
     [Serializable]
