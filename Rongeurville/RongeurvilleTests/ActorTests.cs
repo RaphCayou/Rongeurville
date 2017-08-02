@@ -18,6 +18,29 @@ namespace RongeurvilleTests
                                         "# R                               #   ##  #\n" +
                                         "#      ####         C         #   #\n" +
                                         "###########################################";
+        private const string TEST_MAP2 = "###########################################\n" +
+                                        "#   F    F                            #   #\n" +
+                                        "#    C                                #   #\n" +
+                                        "#   R ##################       ########   #\n" +
+                                        "#     #                #          F   #   #\n" +
+                                        "#     #  F   #         #     ###      #   #\n" +
+                                        "      #      #####     #     #    #       #\n" +
+                                        "#     #######        ###   ###    #       #\n" +
+                                        "#                                 #   ##  #\n" +
+                                        "#      ####                   #   #\n" +
+                                        "###########################################";
+        private const string TEST_MAP3 = "###########################################\n" +
+                                         "#   F    F                            #   #\n" +
+                                         "#                                     #   #\n" +
+                                         "#   R ##################       ########   #\n" +
+                                         "#     #                #          F   #   #\n" +
+                                         "#     #  F   #         #     ###      #   #\n" +
+                                         "    C #      #####     #     #    #       #\n" +
+                                         "#     #######        ###   ###    #       #\n" +
+                                         "#                                 #   ##  #\n" +
+                                         "#      ####                   #   #\n" +
+                                         "###########################################";
+
         [TestMethod]
         public void TestPathFinding()
         {
@@ -32,11 +55,11 @@ namespace RongeurvilleTests
             ratTest3.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(3));
             catTest2.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(4));
             catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(5));
+            Tuple<Coordinates, int> catMove = catTest.GetDirection();
+            Tuple<Coordinates, int> catMove2 = catTest2.GetDirection();
             Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
             Tuple<Coordinates, int> ratMove2 = ratTest2.GetDirection();
             Tuple<Coordinates, int> ratMove3 = ratTest3.GetDirection();
-            Tuple<Coordinates, int> catMove = catTest.GetDirection();
-            Tuple<Coordinates, int> catMove2 = catTest2.GetDirection();
 
             Assert.AreEqual(8, catMove.Item2);
             Assert.AreEqual(19, catMove.Item1.X);
@@ -57,6 +80,46 @@ namespace RongeurvilleTests
             Assert.AreEqual(7, ratMove3.Item2);
             Assert.AreEqual(3, ratMove3.Item1.X);
             Assert.AreEqual(7, ratMove3.Item1.Y);
+        }
+
+        [TestMethod]
+        public void PreciseTestPathFinding()
+        {
+            Map mapTest = Map.ParseMap(TEST_MAP2);
+            Rat ratTest = new Rat();
+            Cat catTest = new Cat();
+            ratTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(1));
+            catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
+            Tuple<Coordinates, int> catMove = catTest.GetDirection();
+            Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
+
+            Assert.AreEqual(2, ratMove.Item2);
+            Assert.AreEqual(4, ratMove.Item1.X);
+            Assert.AreEqual(2, ratMove.Item1.Y);
+
+            Assert.AreEqual(2, catMove.Item2);
+            Assert.AreEqual(5, catMove.Item1.X);
+            Assert.AreEqual(3, catMove.Item1.Y);
+        }
+
+        [TestMethod]
+        public void ManualTestPathFinding()
+        {
+            Map mapTest = Map.ParseMap(TEST_MAP3);
+            Rat ratTest = new Rat();
+            Cat catTest = new Cat();
+            ratTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(1));
+            catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
+            Tuple<Coordinates, int> catMove = catTest.GetDirection();
+            Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
+
+            Assert.AreEqual(2, ratMove.Item2);
+            Assert.AreEqual(4, ratMove.Item1.X);
+            Assert.AreEqual(2, ratMove.Item1.Y);
+
+            Assert.AreEqual(3, catMove.Item2);
+            Assert.AreEqual(4, catMove.Item1.X);
+            Assert.AreEqual(5, catMove.Item1.Y);
         }
     }
 }
