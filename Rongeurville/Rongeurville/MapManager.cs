@@ -17,7 +17,6 @@ namespace Rongeurville
         private Map map;
         private Intracommunicator comm;
         private Logger logger;
-        private Stopwatch stopwatch;
 
         private ActorProcess[] rats;
         private ActorProcess[] cats;
@@ -59,7 +58,6 @@ namespace Rongeurville
                     return ProcessType.Rat;
                 return ProcessType.Cat;
             });
-            stopwatch = new Stopwatch();
         }
 
         /// <summary>
@@ -101,7 +99,7 @@ namespace Rongeurville
 
         public void Start()
         {
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Send map to everyone and start the game
             StartSignal startSignal = new StartSignal { Map = map };
