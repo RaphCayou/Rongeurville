@@ -40,7 +40,9 @@ namespace Rongeurville
         /// </summary>
         public void Start()
         {
-            map = comm.Receive<Map>(0, 0);
+            StartSignal mapReceived = new StartSignal();
+            comm.Broadcast(ref mapReceived, 0);
+            map = mapReceived.Map;
             currentTile = map.GetCurrentTileByRank(rank);
             AliveLoop();
         }
