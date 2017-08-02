@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Rongeurville
 {
@@ -28,17 +29,17 @@ namespace Rongeurville
 
         private void Log(string text)
         {
-            File.AppendAllText(filename, text + Environment.NewLine);
+            File.AppendAllText(filename, $"[{DateTime.Now:HH:mm:ss}] {text}{Environment.NewLine}");
         }
         public void LogExecutionTime(int ms)
         {
             Log("====================================================");
             Log("=====================Statistics=====================");
             Log("====================================================");
-            foreach (var move in moves)
+            foreach (var move in moves.OrderBy(m => m.Key))
             {
                 Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} request {move.Value.NbrAccepted + move.Value.NbrRejected} moves");
-                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has a proportion of {move.Value.NbrAccepted / (double)(move.Value.NbrAccepted + move.Value.NbrRejected)} accepted moves");
+                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has a proportion of {move.Value.NbrAccepted / (double)(move.Value.NbrAccepted + move.Value.NbrRejected)}/1 accepted moves");
             }
             Log($"Total execution time : {ms} ms");
         }
