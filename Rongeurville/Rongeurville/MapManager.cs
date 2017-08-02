@@ -221,6 +221,8 @@ namespace Rongeurville
             {
                 logger.LogMove(sender.Rank, false, sender.Position, moveRequest.DesiredTile);
             }
+            // TODO Delete this and replace it by a timer or something like this
+            logger.LogMap(map.ToString());
 
             if (IsGameOver())
             {

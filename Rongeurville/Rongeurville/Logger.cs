@@ -27,9 +27,9 @@ namespace Rongeurville
                 File.Delete(filename);
         }
 
-        private void Log(string text)
+        private void Log(string text, bool appendDate = true)
         {
-            File.AppendAllText(filename, $"[{DateTime.Now:HH:mm:ss}] {text}{Environment.NewLine}");
+            File.AppendAllText(filename, $"{(appendDate? $"[{DateTime.Now:HH:mm:ss}] " : "")}{text}{Environment.NewLine}");
         }
         public void LogExecutionTime(int ms)
         {
@@ -80,7 +80,7 @@ namespace Rongeurville
         }
         public void LogMap(string map)
         {
-            Log(map);
+            Log(map, false);
         }
     }
 }
