@@ -37,6 +37,7 @@ namespace Rongeurville
             if (!(0 <= destination.Y && destination.Y < Height
                 && 0 <= destination.X && destination.X < Width))
             {
+                Console.WriteLine("*** destination not part of the map");
                 return false; // destination not part of the map
             }
 
@@ -54,17 +55,20 @@ namespace Rongeurville
             // Basic validations
             if (destinationTile.Content == TileContent.Wall)
             {
+                Console.WriteLine("*** Cannot move on a wall");
                 return false; // Cannot move on a wall
             }
 
             if (destinationTile.Content == sourceTile.Content)
             {
+                Console.WriteLine("*** Cannot move to a tile with another actor of the same type as us");
                 return false; // Cannot move to a tile with another actor of the same type as us
             }
 
             // Validations for actor type
             if (sourceTile.Content == TileContent.Rat && (destinationTile.Content & (TileContent.Cheese | TileContent.Empty)) == 0)
             {
+                Console.WriteLine("*** Rats can only go on a Cheese or an empty tile : " + destinationTile.Content.ToString());
                 return false; // Rats can only go on a Cheese or an empty tile
             }
 
@@ -72,11 +76,13 @@ namespace Rongeurville
             {
                 if (verticalDistance == horizontalDistance && verticalDistance == 1)
                 {
+                    Console.WriteLine("*** Cats cannot move in diagonal pattern : " + destinationTile.Content.ToString());
                     return false; // Cats cannot move in diagonal pattern
                 }
 
                 if ((destinationTile.Content & (TileContent.Rat | TileContent.Empty)) == 0)
                 {
+                    Console.WriteLine("*** Cats can only go on a Rat or an empty tile : " + destinationTile.Content.ToString());
                     return false; // Cats can only go on a Rat or an empty tile
                 }
             }

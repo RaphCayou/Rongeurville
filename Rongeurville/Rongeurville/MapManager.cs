@@ -120,9 +120,11 @@ namespace Rongeurville
         /// </summary>
         private void HandleMessageReceive()
         {
+            Console.WriteLine("Map : Ready for next message.");
             // Receive next message and handle it
             Message message = comm.Receive<Message>(Communicator.anySource, 0);
 
+            Console.WriteLine(string.Concat("Map : Message received -> ", message.GetType().Name));
             Communication.Request request = message as Communication.Request;
             if (request != null)
             {
@@ -216,10 +218,13 @@ namespace Rongeurville
                 map.ApplyMove(sender.Position, moveRequest.DesiredTile);
                 sender.Position = moveRequest.DesiredTile;
                 moveSignal.FinalTile = moveRequest.DesiredTile;
+
+                Console.WriteLine("Map : Valid move was applied.");
             }
             else
             {
                 logger.LogMove(sender.Rank, false, sender.Position, moveRequest.DesiredTile);
+                Console.WriteLine("Map : Invalid move.");
             }
 
             if (IsGameOver())
@@ -227,11 +232,15 @@ namespace Rongeurville
                 // Signal to everyone that the game is over and they should stop.
                 KillSignal killSignal = new KillSignal();
                 Broadcast(killSignal);
+
+                Console.WriteLine("Map : Game over broadcasted.");
             }
             else
             {
                 // Broadcast the result of the move
                 Broadcast(moveSignal);
+
+                Console.WriteLine($"Map : Move broadcasted ({sender.Rank} : {moveSignal.InitialTile.ToString()} -> {moveSignal.FinalTile.ToString()}).");
             }
         }
 
@@ -255,6 +264,8 @@ namespace Rongeurville
 
             // Notify the rat that he should stop
             comm.Send(new KillSignal(), rat.Rank, 0);
+
+            Console.WriteLine("Map : Rat killed.");
         }
 
         /// <summary>
@@ -267,6 +278,8 @@ namespace Rongeurville
             logger.LogMeow(sender.Rank, sender.Position);
             MeowSignal meowSignal = new MeowSignal { MeowLocation = sender.Position };
             Broadcast(meowSignal);
+
+            Console.WriteLine("Map : Meow occured.");
         }
 
         /// <summary>
