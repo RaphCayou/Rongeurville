@@ -28,13 +28,12 @@ namespace RongeurvilleTests
             catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(5));
             Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
             Tuple<Coordinates, int> catMove = catTest.GetDirection();
-            Assert.AreEqual(19, catMove.Item2);
+            Assert.AreEqual(8, catMove.Item2);
             Assert.AreEqual(19, catMove.Item1.X);
             Assert.AreEqual(9, catMove.Item1.Y);
-            Assert.AreEqual(9, ratMove.Item2);
+            Assert.AreEqual(8, ratMove.Item2);
             Assert.AreEqual(41, ratMove.Item1.X);
             Assert.AreEqual(3, ratMove.Item1.Y);
-            Assert.AreEqual(0, 1);
         }
     }
 }
