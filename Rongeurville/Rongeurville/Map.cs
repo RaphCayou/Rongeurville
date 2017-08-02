@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using MPI;
 using System.IO;
 
 namespace Rongeurville
@@ -110,7 +108,6 @@ namespace Rongeurville
 
         public void ApplyMove(Coordinates source, Coordinates destination)
         {
-            // TODO apply move
             Tile sourceTile = GetTileByCoordinates(source);
             Tile destinationTile = GetTileByCoordinates(destination);
 
@@ -169,19 +166,11 @@ namespace Rongeurville
             string[] lines = mapContent.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
 
             // find farthest # on a line to find map Width
-            int biggestIndex = 0;
-            foreach (string line in lines)
-            {
-                int lastMapDelimiter = line.LastIndexOf('#');
-                if (lastMapDelimiter > biggestIndex)
-                {
-                    biggestIndex = lastMapDelimiter;
-                }
-            }
+            int biggestIndex = lines.Select(line => line.LastIndexOf('#')).Concat(new[] {0}).Max();
             parsedMap.Width = 1 + biggestIndex;
 
             // Find lowest line containing a # to find map Height
-            parsedMap.Height = 1 + Array.FindLastIndex(lines, line => { return line.Contains('#'); });
+            parsedMap.Height = 1 + Array.FindLastIndex(lines, line => line.Contains('#'));
 
             // Fills the list of tiles with valid instances 
             parsedMap.Tiles = new Tile[parsedMap.Height, parsedMap.Width];
@@ -195,24 +184,23 @@ namespace Rongeurville
                         X = j
                     };
 
-                    if (j < lines[i].Length)
-                    {
-                        // Parse tile content
-                        parsedMap.Tiles[i, j].SetTileContent(lines[i][j]);
+                    if (j >= lines[i].Length) continue;
+                    
+                    // Parse tile content
+                    parsedMap.Tiles[i, j].SetTileContent(lines[i][j]);
 
-                        // If the tile is special, put it in the corresponding list
-                        switch (parsedMap.Tiles[i, j].Content)
-                        {
-                            case TileContent.Rat:
-                                parsedMap.Rats.Add(parsedMap.Tiles[i, j]);
-                                break;
-                            case TileContent.Cat:
-                                parsedMap.Cats.Add(parsedMap.Tiles[i, j]);
-                                break;
-                            case TileContent.Cheese:
-                                parsedMap.Cheese.Add(parsedMap.Tiles[i, j]);
-                                break;
-                        }
+                    // If the tile is special, put it in the corresponding list
+                    switch (parsedMap.Tiles[i, j].Content)
+                    {
+                        case TileContent.Rat:
+                            parsedMap.Rats.Add(parsedMap.Tiles[i, j]);
+                            break;
+                        case TileContent.Cat:
+                            parsedMap.Cats.Add(parsedMap.Tiles[i, j]);
+                            break;
+                        case TileContent.Cheese:
+                            parsedMap.Cheese.Add(parsedMap.Tiles[i, j]);
+                            break;
                     }
                 }
             }
