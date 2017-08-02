@@ -63,8 +63,8 @@ namespace Rongeurville
             {
                 if (!openedTiles.Any())
                 {
-                    pathFind = true;
                     pathCost = NO_PATH;
+                    break;
                 }
                 openedTiles.Sort((tile1, tile2) => tile1.TotalCost().CompareTo(tile2.TotalCost()));
                 lookingTile = openedTiles[0];
