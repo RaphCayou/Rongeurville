@@ -166,7 +166,7 @@ namespace Rongeurville
         {
             Map parsedMap = new Map();
 
-            string[] lines = mapContent.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.None);
+            string[] lines = mapContent.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
 
             // find farthest # on a line to find map Width
             int biggestIndex = 0;

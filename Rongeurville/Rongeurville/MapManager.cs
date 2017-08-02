@@ -260,7 +260,7 @@ namespace Rongeurville
         private void HandleMeow(MeowRequest meowRequest, ActorProcess sender)
         {
             MeowSignal meowSignal = new MeowSignal { MeowLocation = sender.Position };
-            Broadcast(meowRequest);
+            Broadcast(meowSignal);
         }
 
         /// <summary>
