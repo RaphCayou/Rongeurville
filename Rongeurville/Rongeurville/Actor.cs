@@ -13,10 +13,12 @@ namespace Rongeurville
         protected int rank;
 
         protected Tile currentTile;
+        public Tile CurrentTile => currentTile;
 
         protected Map map;
         protected Intracommunicator comm;
         protected bool shouldDie;
+
 
         public abstract List<Tile> GetNeighbors(Tile center);
         public abstract bool CanGoToNeighbor(TileContent content);
@@ -158,7 +160,7 @@ namespace Rongeurville
         private double GetEstimate(Tile target)
         {
             //We are using the Dijkstra, we each tile have an estimate of 1 except the goals
-            return IsGoal(target) ? -1 : 1;
+            return IsGoal(target) ? 0 : 1;
         }
 
         /// <summary>
