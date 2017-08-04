@@ -129,7 +129,10 @@ namespace Rongeurville
             switch (destinationTile.Content)
             {
                 case TileContent.Cheese:
+                    //Console.Write($"Cheese ({Cheese[0].Position.ToString()}, {Cheese[1].Position.ToString()}, {Cheese[2].Position.ToString()}) : {Cheese.Count} -> ");
+                    int countBefore = Cheese.Count;
                     Cheese.RemoveAll(tile => tile.Position.Equals(destination));
+                    Console.WriteLine($"Cheeses went from {countBefore} to {Cheese.Count}");
                     break;
                 case TileContent.Rat:
                     Rats.RemoveAll(tile => tile.Position.Equals(destination));

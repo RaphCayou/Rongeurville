@@ -215,18 +215,27 @@ namespace Rongeurville
             //Console.WriteLine("Actor is Alive" + rank);
             while (!shouldDie)
             {
+                Console.WriteLine($"Actor {rank} begins its path searching");
                 Tuple<Coordinates, int> searchResult = GetDirection(true);
                 MoveEvent(searchResult.Item2);
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position
                     : searchResult.Item1;
                 //Console.WriteLine("Actor is sending Move" + rank);
+                Console.WriteLine($"Actor {rank} ends its path searching");
                 comm.Send(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {
                     //Console.WriteLine("Actor is receiving Move" + rank);
+                    //Message message = null;
+                    if (rank == 3)
+                        Console.WriteLine($"Actor {rank} ready for message");
                     Message message = comm.Receive<Message>(0, 0);
+                    //comm.Broadcast<Message>(ref message, 0);
+                    if (rank == 3)
+                        Console.WriteLine($"Actor {rank} receives message");
+
                     waitingMoveResponse = !HandleMessage(message);
                 }
                 //Console.WriteLine("Actor as received is Move" + rank);
@@ -265,11 +274,31 @@ namespace Rongeurville
             KillSignal killSignal = message as KillSignal;
             if (killSignal != null)
             {
-                shouldDie = true;
-                return true;
+                Console.WriteLine($"Actor {rank} knows that : Following actors should die : {aaaa(killSignal.RanksTargeted)}. {killSignal.KillAll}");
+                if (killSignal.KillAll || killSignal.RanksTargeted.Contains(rank))
+                {
+                    Console.WriteLine($"actor {rank} accepts its death");
+                    shouldDie = true;
+                    return true;
+                }
+                return false;
             }
 
             return false;
+        }
+
+        private string aaaa(List<int> list)
+        {
+            if (list == null)
+            {
+                return "(empty list)";
+            }
+            string testt = "(";
+            foreach (int i in list)
+            {
+                testt = testt + ", " + i.ToString();
+            }
+            return testt + ")";
         }
     }
 }

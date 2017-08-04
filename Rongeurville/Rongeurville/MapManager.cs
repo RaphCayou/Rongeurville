@@ -1,6 +1,7 @@
 ﻿using MPI;
 using Rongeurville.Communication;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,6 +18,9 @@ namespace Rongeurville
         private Map map;
         private Intracommunicator comm;
         private Logger logger;
+
+        private Task messageListenerTask;
+        private BlockingCollection<Message> messageQueue = new BlockingCollection<Message>();
 
         private ActorProcess[] rats;
         private ActorProcess[] cats;
@@ -87,13 +91,17 @@ namespace Rongeurville
         /// <param name="message"></param>
         private void Broadcast(Message message)
         {
-            foreach (ActorProcess actor in cats)
+            //comm.Broadcast(ref message, 0);
+            lock (comm)
             {
-                comm.Send(message, actor.Rank, 0);
-            }
-            foreach (ActorProcess actor in rats)
-            {
-                comm.Send(message, actor.Rank, 0);
+                foreach (ActorProcess actor in cats)
+                {
+                    comm.Send(message, actor.Rank, 0);
+                }
+                foreach (ActorProcess actor in rats)
+                {
+                    comm.Send(message, actor.Rank, 0);
+                }
             }
         }
 
@@ -101,9 +109,39 @@ namespace Rongeurville
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            messageListenerTask = new Task(() =>
+            {
+                while (ContinueExecution)
+                {
+                    // Receive next message and handle it
+                    Console.WriteLine("pre receive");
+                    ReceiveRequest asyncReceive = null;
+                    lock (comm)
+                    {
+                        asyncReceive = comm.ImmediateReceive<Message>(Communicator.anySource, 0);
+                    }
+                    Console.WriteLine("post receive");
+
+                    while (asyncReceive.Test() == null)
+                        ;
+
+                    Message message = (Message)asyncReceive.GetValue();
+
+                    messageQueue.Add(message);
+                    Console.WriteLine("++++ Message queued");
+                }
+                Console.WriteLine("********Completed adding");
+                messageQueue.CompleteAdding();
+            });
+
+            messageListenerTask.Start();
+
             // Send map to everyone and start the game
             StartSignal startSignal = new StartSignal { Map = map };
-            comm.Broadcast(ref startSignal, 0);
+            lock (comm)
+            {
+                comm.Broadcast(ref startSignal, 0);
+            }
 
             while (ContinueExecution)
             {
@@ -121,7 +159,18 @@ namespace Rongeurville
         private void HandleMessageReceive()
         {
             // Receive next message and handle it
-            Message message = comm.Receive<Message>(Communicator.anySource, 0);
+            //Message message = comm.Receive<Message>(Communicator.anySource, 0);
+            Message message = null;
+            try
+            {
+                message = messageQueue.Take();
+                Console.WriteLine("---- Message dequeued");
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine("**** No more messages");
+                return;
+            }
 
             Communication.Request request = message as Communication.Request;
             if (request != null)
@@ -131,7 +180,7 @@ namespace Rongeurville
             else
             {
                 // TODO This is an invalid message, only request are accepted, log it
-
+                Console.WriteLine("*************** Not supposed to happen!!! invalid message");
             }
         }
 
@@ -227,11 +276,13 @@ namespace Rongeurville
             if (IsGameOver())
             {
                 // Signal to everyone that the game is over and they should stop.
-                KillSignal killSignal = new KillSignal();
+                KillSignal killSignal = new KillSignal { KillAll = true };
                 Broadcast(killSignal);
             }
             else
             {
+                Console.WriteLine($"Map accepted move of actor {sender.Rank}");
+
                 // Broadcast the result of the move
                 Broadcast(moveSignal);
             }
@@ -256,7 +307,15 @@ namespace Rongeurville
             rat.Playing = false;
 
             // Notify the rat that he should stop
-            comm.Send(new KillSignal(), rat.Rank, 0);
+            //comm.Send(new KillSignal(), rat.Rank, 0);
+
+            lock (comm)
+            {
+                comm.Send(new KillSignal() { RanksTargeted = new List<int> { rat.Rank } }, rat.Rank, 0);
+            }
+
+            //KillSignal killSignal = new KillSignal { RanksTargeted = new List<int> { rat.Rank } };
+            //comm.Broadcast(ref killSignal, 0);
         }
 
         /// <summary>
