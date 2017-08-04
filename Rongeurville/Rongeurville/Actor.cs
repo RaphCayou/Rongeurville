@@ -26,6 +26,7 @@ namespace Rongeurville
         public abstract bool IsGoal(Tile target);
         protected abstract void MoveEvent(int distanceToObjective);
         protected abstract void ListenMeow(Tile moewTile);
+        protected abstract bool IHaveAGoalRemaning();
 
         public abstract TileContent GetTileContent();
 
@@ -156,6 +157,10 @@ namespace Rongeurville
         //http://www.redblobgames.com/pathfinding/a-star/introduction.html Python -> C#
         public Tuple<Coordinates, int> GetDirection(bool isThisDijkstraBetter)
         {
+            if (!IHaveAGoalRemaning())
+            {
+                return Tuple.Create(currentTile.Position, 0);
+            }
             SimplePriorityQueue<Tile> frontier = new SimplePriorityQueue<Tile>();
             frontier.Enqueue(currentTile, 0);
             Dictionary<Tile, Tile> came_from = new Dictionary<Tile, Tile>();
@@ -181,10 +186,9 @@ namespace Rongeurville
                 }
             }
 
-            int cost = 0;
+            int cost = cost_so_far[came_from[current]] + 1;
             while (!current.Equals(currentTile))
             {
-                cost++;
                 last = current;
                 current = came_from[current];
             }
