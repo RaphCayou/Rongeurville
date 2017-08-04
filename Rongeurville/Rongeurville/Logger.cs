@@ -31,8 +31,9 @@ namespace Rongeurville
         {
             File.AppendAllText(filename, $"{(appendDate? $"[{DateTime.Now:HH:mm:ss}] " : "")}{text}{Environment.NewLine}");
         }
-        public void LogExecutionTime(int ms)
+        public void LogExecutionTime(int ms, ProcessType winner)
         {
+            Log($"The winner(s) are {winner.ToString().ToLower()}(s)");
             Log("====================================================");
             Log("=====================Statistics=====================");
             Log("====================================================");

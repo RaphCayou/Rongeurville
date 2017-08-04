@@ -173,7 +173,7 @@ namespace Rongeurville
             }
 
             stopwatch.Stop();
-            logger.LogExecutionTime((int)stopwatch.ElapsedMilliseconds);
+            logger.LogExecutionTime((int)stopwatch.ElapsedMilliseconds, map.Rats.Count == 0 ? ProcessType.Cat : ProcessType.Rat);
         }
 
         /// <summary>
