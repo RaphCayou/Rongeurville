@@ -261,7 +261,7 @@ namespace Rongeurville
             for (int x = 0; x < map.Width; ++x)
             {
                 int stepY = x == 0 || x == map.Width - 1 ? 1 : map.Height - 1;
-                Console.WriteLine($"Exit found on {map.Tiles[i, map.Width - 1].Position}");
+                Console.WriteLine($"Exit found on {map.Tiles[x, map.Width - 1].Position}");
 
                 for (int y = 0; y < map.Height; y += stepY)
                     if (map.Tiles[y, x].Content == TileContent.Empty)
