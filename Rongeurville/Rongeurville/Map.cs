@@ -93,6 +93,12 @@ namespace Rongeurville
             RatEscaped,
         }
 
+        /// <summary>
+        /// Returns the effect of the move without applying it
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <returns></returns>
         public MoveEffect CheckForMoveEffects(Coordinates source, Coordinates destination)
         {
             if (!ValidateDestinationTile(source, destination))
@@ -121,6 +127,11 @@ namespace Rongeurville
             return MoveEffect.AcceptedMove;
         }
 
+        /// <summary>
+        /// Apply a move and update the map with the new state.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
         public void ApplyMove(Coordinates source, Coordinates destination)
         {
             Tile sourceTile = GetTileByCoordinates(source);
@@ -129,35 +140,32 @@ namespace Rongeurville
             switch (destinationTile.Content)
             {
                 case TileContent.Cheese:
-                    //Console.Write($"Cheese ({Cheese[0].Position.ToString()}, {Cheese[1].Position.ToString()}, {Cheese[2].Position.ToString()}) : {Cheese.Count} -> ");
-                    int countBefore = Cheese.Count;
-                    Cheese.RemoveAll(tile => tile.Position.Equals(destination));
-                    Console.WriteLine($"Cheeses went from {countBefore} to {Cheese.Count}");
+                    Cheese.RemoveAll(tile => tile.Position.Equals(destination)); // Removes the cheese eaten
                     break;
                 case TileContent.Rat:
-                    Rats.RemoveAll(tile => tile.Position.Equals(destination));
+                    Rats.RemoveAll(tile => tile.Position.Equals(destination)); // Removes the rat captured
                     break;
             }
 
             switch (sourceTile.Content)
             {
                 case TileContent.Cat:
-                    Cats[Cats.FindIndex(tile => tile.Equals(sourceTile))] = destinationTile;
+                    Cats[Cats.FindIndex(tile => tile.Equals(sourceTile))] = destinationTile; // Change the cat position 
                     break;
                 case TileContent.Rat:
-                    Console.WriteLine($"================={Rats.FindIndex(tile => tile.Equals(sourceTile))}");
-                    Rats[Rats.FindIndex(tile => tile.Position.Equals(sourceTile.Position))] = destinationTile;
+                    Rats[Rats.FindIndex(tile => tile.Position.Equals(sourceTile.Position))] = destinationTile; // Change the rat position 
                     break;
             }
 
+            // Move the source's content to the destination's content
             destinationTile.Content = sourceTile.Content;
             sourceTile.Content = TileContent.Empty;
 
             if (Exits.Any(e => e.Position.Equals(destination)) && destinationTile.Content == TileContent.Rat)
             {
-                // A rat reached the exit, delete it from the rats list and from the map
-                Rats.RemoveAll(tile => tile.Position.Equals(destination));
-                destinationTile.Content = TileContent.Empty;
+                // A rat reached the exit
+                Rats.RemoveAll(tile => tile.Position.Equals(destination)); // Removes the escaped rat
+                destinationTile.Content = TileContent.Empty; // Empty the tile 
             }
         }
 

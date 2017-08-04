@@ -41,7 +41,6 @@ namespace Rongeurville
         /// <param name="communicator">MPI Communicator</param>
         protected Actor(Intracommunicator communicator)
         {
-            //Console.WriteLine("Constructing Actor");
             comm = communicator;
             rank = comm.Rank;
             shouldDie = false;
@@ -52,15 +51,12 @@ namespace Rongeurville
         /// </summary>
         public void Start()
         {
-            //Console.WriteLine("Starting Actor" + rank);
             StartSignal mapReceived = new StartSignal();
             comm.Broadcast(ref mapReceived, 0);
-            map = mapReceived.Map;
-            //Console.WriteLine(map);
 
-            //map = comm.Receive<StartSignal>(0, 0).Map;
-            //Console.WriteLine("Map received in Actor" + rank);
+            map = mapReceived.Map;
             currentTile = map.GetCurrentTileByRank(rank);
+
             AliveLoop();
         }
 
@@ -77,7 +73,6 @@ namespace Rongeurville
         //http://www.redblobgames.com/pathfinding/a-star/introduction.html Python -> C#
         public Tuple<Coordinates, int> GetDirection()
         {
-            //Console.WriteLine("Actor is getting a direction" + rank);
             if (!IHaveAGoalRemaning())
             {
                 return Tuple.Create(currentTile.Position, 0);
@@ -113,7 +108,6 @@ namespace Rongeurville
                 last = current;
                 current = came_from[current];
             }
-            //Console.WriteLine($"{rank} Actor at {currentTile.Position} got a direction {tileToGo?.Position} in {closedTiles.Count} with the cost {pathCost}  " + rank);
 
             return Tuple.Create(last.Position, cost);
         }
@@ -137,34 +131,21 @@ namespace Rongeurville
         /// </summary>
         public void AliveLoop()
         {
-
-            //Console.WriteLine("Actor is Alive" + rank);
             while (!shouldDie)
             {
-                Console.WriteLine($"Actor {rank} begins its path searching");
                 Tuple<Coordinates, int> searchResult = GetDirection();
                 MoveEvent(searchResult.Item2);
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position
                     : searchResult.Item1;
-                //Console.WriteLine("Actor is sending Move" + rank);
-                Console.WriteLine($"Actor {rank} ends its path searching");
+
                 comm.Send(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
+
                 bool waitingMoveResponse = true;
                 while (waitingMoveResponse)
                 {
-                    //Console.WriteLine("Actor is receiving Move" + rank);
-                    //Message message = null;
-                    if (rank == 3)
-                        Console.WriteLine($"Actor {rank} ready for message");
-                    Message message = comm.Receive<Message>(0, 0);
-                    //comm.Broadcast<Message>(ref message, 0);
-                    if (rank == 3)
-                        Console.WriteLine($"Actor {rank} receives message");
-
-                    waitingMoveResponse = !HandleMessage(message);
+                    waitingMoveResponse = !HandleMessage(comm.Receive<Message>(0, 0));
                 }
-                //Console.WriteLine("Actor as received is Move" + rank);
             }
             comm.Send(new DeathConfirmation { Rank = rank }, 0, 0);
         }
@@ -179,12 +160,9 @@ namespace Rongeurville
             MoveSignal moveSignal = message as MoveSignal;
             if (moveSignal != null)
             {
-                Console.WriteLine($"****** Actor #{rank} called ApplyMove");
                 map.ApplyMove(moveSignal.InitialTile, moveSignal.FinalTile);
-                //Console.WriteLine($"{rank} Receive move: initial: {moveSignal.InitialTile.X} x {moveSignal.InitialTile.Y} target : {moveSignal.FinalTile.X} x {moveSignal.FinalTile.Y} current position {currentTile.X} x {currentTile.Y}");
                 if (moveSignal.InitialTile.Equals(currentTile.Position))
                 {
-                    //Console.WriteLine("Actor got is new postion " + rank);
                     currentTile = map.Tiles[moveSignal.FinalTile.Y, moveSignal.FinalTile.X];
                     return true;
                 }
@@ -201,31 +179,11 @@ namespace Rongeurville
             KillSignal killSignal = message as KillSignal;
             if (killSignal != null)
             {
-                Console.WriteLine($"Actor {rank} knows that : Following actors should die : {aaaa(killSignal.RanksTargeted)}. {killSignal.KillAll}");
-                if (killSignal.KillAll || killSignal.RanksTargeted.Contains(rank))
-                {
-                    Console.WriteLine($"actor {rank} accepts its death");
-                    shouldDie = true;
-                    return true;
-                }
-                return false;
+                shouldDie = true;
+                return true;
             }
 
             return false;
-        }
-
-        private string aaaa(List<int> list)
-        {
-            if (list == null)
-            {
-                return "(empty list)";
-            }
-            string testt = "(";
-            foreach (int i in list)
-            {
-                testt = testt + ", " + i.ToString();
-            }
-            return testt + ")";
         }
     }
 }
