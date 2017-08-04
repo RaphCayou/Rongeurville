@@ -43,6 +43,11 @@ namespace Rongeurville
             //We do not react to Meow as a Cat.
         }
 
+        protected override bool IHaveAGoalRemaning()
+        {
+            return map.Rats.Any();
+        }
+
         /// <summary>
         /// Determine acceptable move tiles for a cat (4 adjacent tiles)
         /// </summary>

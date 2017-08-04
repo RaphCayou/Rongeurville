@@ -51,6 +51,11 @@ namespace Rongeurville
             }
         }
 
+        protected override bool IHaveAGoalRemaning()
+        {
+            return timeSinceLastMeow > 0 ? map.Exits.Any() : map.Cheese.Any();
+        }
+
         /// <summary>
         /// Determine acceptable move tiles for a rat (8 adjacent tiles)
         /// </summary>
