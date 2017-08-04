@@ -148,6 +148,13 @@ namespace Rongeurville
 
             destinationTile.Content = sourceTile.Content;
             sourceTile.Content = TileContent.Empty;
+
+            if (Exits.Any(e => e.Position.Equals(destination)) && destinationTile.Content == TileContent.Rat)
+            {
+                // A rat reached the exit, delete it from the rats list and from the map
+                Rats.RemoveAll(tile => tile.Position.Equals(destination));
+                destinationTile.Content = TileContent.Empty;
+            }
         }
 
         /// <summary>
