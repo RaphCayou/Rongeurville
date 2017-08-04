@@ -74,89 +74,10 @@ namespace Rongeurville
         /// Find the closest objective to go on. Dijkstra Pathfinding
         /// </summary>
         /// <returns>Next to tile to go on and the cost to go on that tile. Postion is null and cost is equal to NO_COST if path find.</returns>
+        //http://www.redblobgames.com/pathfinding/a-star/introduction.html Python -> C#
         public Tuple<Coordinates, int> GetDirection()
         {
-
             //Console.WriteLine("Actor is getting a direction" + rank);
-            PathTile lookingTile =
-                new PathTile { CostSoFar = 0, Estimate = GetEstimate(currentTile), Value = currentTile };
-            bool pathFind = false;
-            int pathCost = -1;
-            List<PathTile> openedTiles = new List<PathTile>();
-            List<PathTile> closedTiles = new List<PathTile>();
-
-            openedTiles.Add(lookingTile);
-            while (!pathFind)
-            {
-                if (!openedTiles.Any())
-                {
-                    pathFind = true;
-                    pathCost = NO_PATH;
-                    //Console.WriteLine("Actor did not find a direction." + rank);
-                }
-                else
-                {
-                    openedTiles.Sort((tile1, tile2) => tile1.TotalCost().CompareTo(tile2.TotalCost()));
-                    lookingTile = openedTiles[0];
-                    openedTiles.RemoveAt(0);
-                    if (IsGoal(lookingTile.Value))
-                    {
-                        pathFind = true;
-                        pathCost = lookingTile.CostSoFar;
-                    }
-                    else
-                    {
-                        closedTiles.Add(lookingTile);
-                        foreach (Tile tile in GetNeighbors(lookingTile.Value))
-                        {
-                            PathTile neighbor = new PathTile
-                            {
-                                CostSoFar = lookingTile.CostSoFar + 1,
-                                Estimate = GetEstimate(tile),
-                                Value = tile,
-                                Parent = lookingTile
-                            };
-                            //Console.WriteLine($"Testing the tile x:{neighbor.Value.X} Y:{neighbor.Value.Y} and the cost:{neighbor.CostSoFar}, {neighbor.Estimate}");
-                            foreach (List<PathTile> pathTiles in new[] { openedTiles, closedTiles })
-                            {
-                                PathTile inPathTile =
-                                    pathTiles.FirstOrDefault(
-                                        openTile => openTile.Value.Equals(neighbor.Value) &&
-                                                    openTile.CostSoFar >= neighbor.CostSoFar);
-                                if (inPathTile != null)
-                                {
-                                    //Console.WriteLine($"The new tile is better.Old:{inPathTile.Value.X}x{inPathTile.Value.Y} cost:{inPathTile.TotalCost()} New:{neighbor.Value.X}x{neighbor.Value.Y} cost:{neighbor.TotalCost()}");
-                                    pathTiles.RemoveAll(pathTile =>pathTile.Value.Equals(inPathTile.Value));
-                                    openedTiles.Add(neighbor);
-                                }
-                            }
-                            if (!openedTiles.Contains(neighbor) && !closedTiles.Contains(neighbor))
-                            {
-                                openedTiles.Add(neighbor);
-                            }
-                        }
-                    }
-
-                }
-            }
-            Tile tileToGo = null;
-            if (pathCost != NO_PATH)
-            {
-                tileToGo = currentTile;
-                while (lookingTile.Parent != null)
-                {
-                    tileToGo = lookingTile.Value;
-                    lookingTile = lookingTile.Parent;
-                }
-            }
-
-            //Console.WriteLine($"{rank} Actor at {currentTile.Position} got a direction {tileToGo?.Position} in {closedTiles.Count} with the cost {pathCost}  " + rank);
-            return new Tuple<Coordinates, int>(tileToGo?.Position, pathCost);
-        }
-
-        //http://www.redblobgames.com/pathfinding/a-star/introduction.html Python -> C#
-        public Tuple<Coordinates, int> GetDirection(bool isThisDijkstraBetter)
-        {
             if (!IHaveAGoalRemaning())
             {
                 return Tuple.Create(currentTile.Position, 0);
@@ -167,7 +88,7 @@ namespace Rongeurville
             Dictionary<Tile, int> cost_so_far = new Dictionary<Tile, int> {{currentTile,0}};
             Tile current = currentTile, last = currentTile;
 
-            while (frontier.Count != 0)
+            while (frontier.Any())
             {
                 current = frontier.Dequeue();
 
@@ -192,6 +113,7 @@ namespace Rongeurville
                 last = current;
                 current = came_from[current];
             }
+            //Console.WriteLine($"{rank} Actor at {currentTile.Position} got a direction {tileToGo?.Position} in {closedTiles.Count} with the cost {pathCost}  " + rank);
 
             return Tuple.Create(last.Position, cost);
         }
@@ -220,7 +142,7 @@ namespace Rongeurville
             while (!shouldDie)
             {
                 Console.WriteLine($"Actor {rank} begins its path searching");
-                Tuple<Coordinates, int> searchResult = GetDirection(true);
+                Tuple<Coordinates, int> searchResult = GetDirection();
                 MoveEvent(searchResult.Item2);
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position

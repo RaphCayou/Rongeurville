@@ -30,15 +30,15 @@ namespace RongeurvilleTests
             Cat catTest = new Cat();
             Cat catTest2 = new Cat();
             ratTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(1));
-            Tuple<Coordinates, int> ratMove = ratTest.GetDirection(true);
+            Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
             ratTest2.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
             ratTest3.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(3));
             catTest2.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(4));
             catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(5));
-            Tuple<Coordinates, int> catMove = catTest.GetDirection(true);
-            Tuple<Coordinates, int> catMove2 = catTest2.GetDirection(true);
-            Tuple<Coordinates, int> ratMove2 = ratTest2.GetDirection(true);
-            Tuple<Coordinates, int> ratMove3 = ratTest3.GetDirection(true);
+            Tuple<Coordinates, int> catMove = catTest.GetDirection();
+            Tuple<Coordinates, int> catMove2 = catTest2.GetDirection();
+            Tuple<Coordinates, int> ratMove2 = ratTest2.GetDirection();
+            Tuple<Coordinates, int> ratMove3 = ratTest3.GetDirection();
 
             Assert.AreEqual(8, catMove.Item2);
             Assert.AreEqual(20, catMove.Item1.X);
@@ -87,19 +87,26 @@ namespace RongeurvilleTests
                                      "###########################################";
             Map mapTest = Map.ParseMap(TEST_MAP2);
             Rat ratTest = new Rat();
+            Rat ratTest2 = new Rat();
             Cat catTest = new Cat();
             ratTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(1));
-            catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
+            ratTest2.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
+            catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(3));
             Tuple<Coordinates, int> catMove = catTest.GetDirection();
             Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
+            Tuple<Coordinates, int> ratMove2 = ratTest2.GetDirection();
 
-            Assert.AreEqual(2, ratMove.Item2);
-            Assert.AreEqual(3, ratMove.Item1.X);
-            Assert.AreEqual(2, ratMove.Item1.Y);
+            Assert.AreEqual(1, ratMove.Item2);
+            Assert.AreEqual(4, ratMove.Item1.X);
+            Assert.AreEqual(1, ratMove.Item1.Y);
+
+            Assert.AreEqual(2, ratMove2.Item2);
+            Assert.AreEqual(4, ratMove2.Item1.X);
+            Assert.AreEqual(2, ratMove2.Item1.Y);
 
             Assert.AreEqual(2, catMove.Item2);
-            Assert.AreEqual(4, catMove.Item1.X);
-            Assert.AreEqual(2, catMove.Item1.Y);
+            Assert.AreEqual(5, catMove.Item1.X);
+            Assert.AreEqual(3, catMove.Item1.Y);
         }
 
         [TestMethod]
@@ -121,12 +128,12 @@ namespace RongeurvilleTests
             Cat catTest = new Cat();
             ratTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(1));
             catTest.SetMapAndCurrentTile(mapTest, mapTest.GetCurrentTileByRank(2));
-            Tuple<Coordinates, int> catMove = catTest.GetDirection(true);
-            Tuple<Coordinates, int> ratMove = ratTest.GetDirection(true);
+            Tuple<Coordinates, int> catMove = catTest.GetDirection();
+            Tuple<Coordinates, int> ratMove = ratTest.GetDirection();
 
-            Assert.AreEqual(2, ratMove.Item2);
+            Assert.AreEqual(1, ratMove.Item2);
             Assert.AreEqual(4, ratMove.Item1.X);
-            Assert.AreEqual(2, ratMove.Item1.Y);
+            Assert.AreEqual(1, ratMove.Item1.Y);
 
             //Assert.AreEqual(3, catMove.Item2);
             //Assert.AreEqual(4, catMove.Item1.X);

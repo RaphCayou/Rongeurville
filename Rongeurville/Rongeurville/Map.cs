@@ -257,13 +257,15 @@ namespace Rongeurville
         /// <param name="map"></param>
         public static void FindExits(ref Map map)
         {
-            for (int i = 0; i < map.Height; ++i)
+
+            for (int x = 0; x < map.Width; ++x)
             {
-                if (map.Tiles[i, map.Width - 1].Content == TileContent.Empty)
-                {
-                    Console.WriteLine($"Exit found on {map.Tiles[i, map.Width - 1].Position}");
-                    map.Exits.Add(map.Tiles[i, map.Width - 1]);
-                }
+                int stepY = x == 0 || x == map.Width - 1 ? 1 : map.Height - 1;
+                Console.WriteLine($"Exit found on {map.Tiles[i, map.Width - 1].Position}");
+
+                for (int y = 0; y < map.Height; y += stepY)
+                    if (map.Tiles[y, x].Content == TileContent.Empty)
+                        map.Exits.Add(map.Tiles[y, x]);
             }
         }
 
