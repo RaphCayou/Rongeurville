@@ -45,10 +45,10 @@ namespace Rongeurville
         protected override void ListenMeow(Tile meowTile)
         {
             // Cat is close by
-            if (Math.Abs(currentTile.X - meowTile.X) <= 7 || Math.Abs(currentTile.Y - meowTile.Y) <= 7)
+            if (Math.Abs(currentTile.X - meowTile.X) <= 7 && Math.Abs(currentTile.Y - meowTile.Y) <= 7)
             {
                 timeSinceLastMeow = 5;
-            }
+            } 
         }
 
         protected override bool IHaveAGoalRemaning()

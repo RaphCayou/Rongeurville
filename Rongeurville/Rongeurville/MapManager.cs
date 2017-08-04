@@ -122,13 +122,20 @@ namespace Rongeurville
                     }
                     Console.WriteLine("post receive");
 
-                    while (asyncReceive.Test() == null)
+                    while (ContinueExecution && asyncReceive.Test() == null)
                         ;
+                    if (ContinueExecution)
+                    {
+                        Message message = (Message)asyncReceive.GetValue();
 
-                    Message message = (Message)asyncReceive.GetValue();
+                        messageQueue.Add(message);
+                        Console.WriteLine("++++ Message queued");
 
-                    messageQueue.Add(message);
-                    Console.WriteLine("++++ Message queued");
+                    }
+                    else
+                    {
+                        asyncReceive.Cancel();
+                    }
                 }
                 Console.WriteLine("********Completed adding");
                 messageQueue.CompleteAdding();
