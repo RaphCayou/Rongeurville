@@ -253,6 +253,7 @@ namespace Rongeurville
             MoveSignal moveSignal = message as MoveSignal;
             if (moveSignal != null)
             {
+                Console.WriteLine($"****** Actor #{rank} called ApplyMove");
                 map.ApplyMove(moveSignal.InitialTile, moveSignal.FinalTile);
                 //Console.WriteLine($"{rank} Receive move: initial: {moveSignal.InitialTile.X} x {moveSignal.InitialTile.Y} target : {moveSignal.FinalTile.X} x {moveSignal.FinalTile.Y} current position {currentTile.X} x {currentTile.Y}");
                 if (moveSignal.InitialTile.Equals(currentTile.Position))

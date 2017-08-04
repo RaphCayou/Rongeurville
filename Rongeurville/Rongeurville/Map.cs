@@ -145,7 +145,8 @@ namespace Rongeurville
                     Cats[Cats.FindIndex(tile => tile.Equals(sourceTile))] = destinationTile;
                     break;
                 case TileContent.Rat:
-                    Rats[Rats.FindIndex(tile => tile.Equals(sourceTile))] = destinationTile;
+                    Console.WriteLine($"================={Rats.FindIndex(tile => tile.Equals(sourceTile))}");
+                    Rats[Rats.FindIndex(tile => tile.Position.Equals(sourceTile.Position))] = destinationTile;
                     break;
             }
 
@@ -260,6 +261,7 @@ namespace Rongeurville
             {
                 if (map.Tiles[i, map.Width - 1].Content == TileContent.Empty)
                 {
+                    Console.WriteLine($"Exit found on {map.Tiles[i, map.Width - 1].Position}");
                     map.Exits.Add(map.Tiles[i, map.Width - 1]);
                 }
             }
