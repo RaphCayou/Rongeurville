@@ -11,6 +11,8 @@ namespace Rongeurville
     public abstract class Actor
     {
         protected const int NO_PATH = -1;
+        private const int MAP_RANK = 0;
+        private const int DEFAULT_TAG = 0;
         protected int rank;
 
         protected Tile currentTile;
@@ -21,11 +23,42 @@ namespace Rongeurville
         protected bool shouldDie;
 
 
+        /// <summary>
+        /// Gives the tiles around the target tile.
+        /// </summary>
+        /// <param name="center">The tile to get neighbors.</param>
+        /// <returns>The surrounding tiles.</returns>
         public abstract List<Tile> GetNeighbors(Tile center);
+
+        /// <summary>
+        /// Return if the Actor can go on the targeted tile.
+        /// </summary>
+        /// <param name="content">The content of the tile that we want to go on.</param>
+        /// <returns>Return true if we can go on that tile.</returns>
         public abstract bool CanGoToNeighbor(TileContent content);
+
+        /// <summary>
+        /// Return if the targeted tile is an objective.
+        /// </summary>
+        /// <param name="target">The targeted tile.</param>
+        /// <returns>Return true if the tile is a goal.</returns>
         public abstract bool IsGoal(Tile target);
+
+        /// <summary>
+        /// Signal that the Actor has move.
+        /// </summary>
+        /// <param name="distanceToObjective">Distance with the current objective.</param>
         protected abstract void MoveEvent(int distanceToObjective);
+        /// <summary>
+        /// Signal the Actor that a cat meow on the map.
+        /// </summary>
+        /// <param name="moewTile">The tile that the cap meow on.</param>
         protected abstract void ListenMeow(Tile moewTile);
+
+        /// <summary>
+        /// Return if the actor still have an objective on the map.
+        /// </summary>
+        /// <returns>True if the map still contain objective.</returns>
         protected abstract bool IHaveAGoalRemaning();
 
         public abstract TileContent GetTileContent();
@@ -52,6 +85,7 @@ namespace Rongeurville
         public void Start()
         {
             StartSignal startSignal = comm.Receive<StartSignal>(0, 0);
+            // We wait for the broadcast of the start of the game.
 
             map = startSignal.Map;
             currentTile = map.GetTileByCoordinates(startSignal.Position);
@@ -72,40 +106,45 @@ namespace Rongeurville
         //http://www.redblobgames.com/pathfinding/a-star/introduction.html Python -> C#
         public Tuple<Coordinates, int> GetDirection()
         {
+            // We make sure that we still have a possible target.
             if (!IHaveAGoalRemaning())
             {
                 return Tuple.Create(currentTile.Position, 0);
             }
             SimplePriorityQueue<Tile> frontier = new SimplePriorityQueue<Tile>();
             frontier.Enqueue(currentTile, 0);
-            Dictionary<Tile, Tile> came_from = new Dictionary<Tile, Tile>();
-            Dictionary<Tile, int> cost_so_far = new Dictionary<Tile, int> {{currentTile,0}};
+            Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
+            Dictionary<Tile, int> costSoFar = new Dictionary<Tile, int> {{currentTile,0}};
             Tile current = currentTile, last = currentTile;
 
+            // While we still have tiles to go.
             while (frontier.Any())
             {
                 current = frontier.Dequeue();
 
+                // If the tile is an objective, we stop the search.
                 if (IsGoal(current))
                     break;
 
                 foreach (Tile next in GetNeighbors(current))
                 {
-                    int newCost = cost_so_far[current] + 1;
-                    if (!cost_so_far.ContainsKey(next) || newCost < cost_so_far[next])
+                    int newCost = costSoFar[current] + 1;
+                    // We update or add the cost of the tile so far.
+                    if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
                     {
-                        cost_so_far[next] = newCost;
+                        costSoFar[next] = newCost;
                         frontier.Enqueue(next, newCost);
-                        came_from[next] = current;
+                        cameFrom[next] = current;
                     }
                 }
             }
 
-            int cost = cost_so_far[came_from[current]] + 1;
+            // We reconstruct the path the find the next tile to go on.
+            int cost = costSoFar[cameFrom[current]] + 1;
             while (!current.Equals(currentTile))
             {
                 last = current;
-                current = came_from[current];
+                current = cameFrom[current];
             }
 
             return Tuple.Create(last.Position, cost);
@@ -134,19 +173,22 @@ namespace Rongeurville
             {
                 Tuple<Coordinates, int> searchResult = GetDirection();
                 MoveEvent(searchResult.Item2);
+                // If we did not find a path, we stay where we are.
                 Coordinates targetCoordinates = searchResult.Item2 == NO_PATH
                     ? currentTile.Position
                     : searchResult.Item1;
 
-                comm.Send(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, 0, 0);
+                comm.Send(new MoveRequest { Rank = rank, DesiredTile = targetCoordinates }, MAP_RANK, DEFAULT_TAG);
 
                 bool waitingMoveResponse = true;
+                // We wait to receive our new position.
                 while (waitingMoveResponse)
                 {
-                    waitingMoveResponse = !HandleMessage(comm.Receive<Message>(0, 0));
+                    waitingMoveResponse = !HandleMessage(comm.Receive<Message>(MAP_RANK, DEFAULT_TAG));
                 }
             }
-            comm.Send(new DeathConfirmation { Rank = rank }, 0, 0);
+            // We confirme to the map that we are dead.
+            comm.Send(new DeathConfirmation { Rank = rank }, MAP_RANK, DEFAULT_TAG);
         }
 
         /// <summary>
@@ -171,6 +213,7 @@ namespace Rongeurville
             MeowSignal meowSignal = message as MeowSignal;
             if (meowSignal != null)
             {
+                // We notif that a cat Meow.
                 ListenMeow(map.Tiles[meowSignal.MeowLocation.Y, meowSignal.MeowLocation.X]);
                 return false;
             }
@@ -178,6 +221,7 @@ namespace Rongeurville
             KillSignal killSignal = message as KillSignal;
             if (killSignal != null)
             {
+                // The map said that we need to die.
                 shouldDie = true;
                 return true;
             }

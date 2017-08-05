@@ -7,6 +7,7 @@ namespace Rongeurville
 {
     public class Cat : Actor
     {
+        // The cats can go through rats and empty tiles.
         private static readonly TileContent[] GO_THROUGH = { TileContent.Rat, TileContent.Empty };
 
         public Cat() : base()
@@ -40,11 +41,13 @@ namespace Rongeurville
         /// <param name="meowTile">Tile on map from where meow was heard</param>
         protected override void ListenMeow(Tile meowTile)
         {
-            //We do not react to Meow as a Cat.
+            // We do not react to Meow as a Cat.
+            // He might purrs.
         }
 
         protected override bool IHaveAGoalRemaning()
         {
+            // If the map contains rat, we still have objectives.
             return map.Rats.Any();
         }
 
