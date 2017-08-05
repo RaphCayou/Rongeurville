@@ -53,6 +53,7 @@ namespace Rongeurville
 
         protected override bool IHaveAGoalRemaning()
         {
+            // If we are feared, we go in the direction of the exits and if not, we go toward the cheese.
             return timeSinceLastMeow > 0 ? map.Exits.Any() : map.Cheese.Any();
         }
 
@@ -137,11 +138,6 @@ namespace Rongeurville
         /// <returns>Whether the tile is a current goal for the rat</returns>
         public override bool IsGoal(Tile target)
         {
-            // TODO Remove this if, its a test
-            if (map.Exits.Contains(target) != map.Exits.Any(e => e.Position.Equals(target.Position)))
-            {
-                Console.WriteLine("******************* error in goal function ********************");
-            }
             return timeSinceLastMeow > 0 ? map.Exits.Contains(target) : TileContent.Cheese == target.Content;
         }
 

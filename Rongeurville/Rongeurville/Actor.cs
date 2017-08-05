@@ -201,6 +201,7 @@ namespace Rongeurville
             MoveSignal moveSignal = message as MoveSignal;
             if (moveSignal != null)
             {
+                // Update the map based on the move received.
                 map.ApplyMove(moveSignal.InitialTile, moveSignal.FinalTile);
                 if (moveSignal.InitialTile.Equals(currentTile.Position))
                 {

@@ -52,16 +52,20 @@ namespace RongeurvilleTests
             Assert.AreEqual(40, ratMove.Item1.X);
             Assert.AreEqual(3, ratMove.Item1.Y);
 
+            // First move.
             Assert.AreEqual(8, ratMove2.Item2);
             Assert.AreEqual(16, ratMove2.Item1.X);
             Assert.AreEqual(5, ratMove2.Item1.Y);
+            // Second move.
             //ratMove2 = ratTest2.GetDirection(true);
             //Assert.AreEqual(7, ratMove2.Item2);
             //Assert.AreEqual(15, ratMove2.Item1.X);
             //Assert.AreEqual(4, ratMove2.Item1.Y);
+            // Third move.
             //Assert.AreEqual(6, ratMove2.Item2);
             //Assert.AreEqual(14, ratMove2.Item1.X);
             //Assert.AreEqual(5, ratMove2.Item1.Y);
+            // Forth move.
             //Assert.AreEqual(5, ratMove2.Item2);
             //Assert.AreEqual(13, ratMove2.Item1.X);
             //Assert.AreEqual(4, ratMove2.Item1.Y);
