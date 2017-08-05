@@ -6,5 +6,6 @@ namespace Rongeurville.Communication
     public class StartSignal : Signal
     {
         public Map Map;
+        public Coordinates Position;
     }
 }

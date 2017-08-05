@@ -15,27 +15,26 @@ namespace Rongeurville
 {
     class MapManager
     {
-        private Map map;
         private Intracommunicator comm;
         private Logger logger;
-
+        
+        private ActorProcess[] actors;
+        private Map map;
+        
+        private volatile bool ContinueExecution = true;
         private Task messageListenerTask;
         private BlockingCollection<Message> messageQueue = new BlockingCollection<Message>();
-
-        private ActorProcess[] rats;
-        private ActorProcess[] cats;
-
-        private volatile bool ContinueExecution = true;
 
         class ActorProcess
         {
             public int Rank;
+            public ProcessType Type;
             public bool IsDeadProcess = false;
             public bool Playing = true;
             public Coordinates Position;
         }
 
-        public MapManager(Intracommunicator comm, string mapFilePath, int numberOfRats, int numberOfCats)
+        public MapManager(Intracommunicator comm, string mapFilePath, ActorsDivider divider)
         {
             this.comm = comm;
 
@@ -44,9 +43,9 @@ namespace Rongeurville
                 throw new FileNotFoundException("The map file was not found.");
             }
 
-            map = Map.LoadMapFromFile(mapFilePath);
+            map = LoadMapFromFile(mapFilePath);
 
-            if (map.Rats.Count != numberOfRats || map.Cats.Count != numberOfCats)
+            if (map.Rats.Count != divider.NumberOfRats || map.Cats.Count != divider.NumberOfCats)
             {
                 throw new Exception("Rat or cat counts does not match with map loaded.");
             }
@@ -54,17 +53,39 @@ namespace Rongeurville
             InitActorProcesses();
 
             // Logger
-            logger = new Logger(rank =>
-            {
-                if (rank == 0)
-                    return ProcessType.Map;
-                if (rank <= numberOfRats)
-                    return ProcessType.Rat;
-                return ProcessType.Cat;
-            });
+            logger = new Logger(divider.GetProcesTypeByRank);
 
             // Initialize the message listener task
             messageListenerTask = new Task(ReceiveMessages);
+        }
+
+        /// <summary>
+        /// Initialize ActorProcess lists for rats and cats
+        /// </summary>
+        private void InitActorProcesses()
+        {
+            List<ActorProcess> actorsList = new List<ActorProcess>();
+            int count = 0;
+            actorsList.AddRange(map.Rats.Select(t => new ActorProcess
+            {
+                Rank = ++count,
+                Type = ProcessType.Rat,
+                IsDeadProcess = false,
+                Playing = true,
+                Position = t.Position
+            }).ToArray());
+
+            actorsList.AddRange(map.Cats.Select(t => new ActorProcess
+            {
+                Rank = ++count,
+                Type = ProcessType.Cat,
+                IsDeadProcess = false,
+                Playing = true,
+                Position = t.Position
+            }).ToArray());
+
+            // We need to access elements in this collection by index (rank - 1), so an array is more efficient than a list even though initialization is more costful.
+            actors = actorsList.ToArray();
         }
 
         /// <summary>
@@ -83,63 +104,32 @@ namespace Rongeurville
                     asyncReceive = comm.ImmediateReceive<Message>(Communicator.anySource, 0); 
                 }
 
-                // waits for a message to be received, stops if the execution stops
-                //asyncReceive.Wait();
-                while (ContinueExecution && asyncReceive.Test() == null)
+                // Creates a task that waits for the result to arrive.
+                // Note : We must use a task because the Wait function of a task allows for a timeout parameter which we need to validate if the execution is still ongoing
+                Task waitForMessage = new Task(() =>
+                {
+                    asyncReceive.Wait();
+                });
+                waitForMessage.Start();
+
+                // waits for a message to be received, stops (within 200ms) if the execution stops
+                while (ContinueExecution && !waitForMessage.Wait(200))
                     ;
 
                 if (!ContinueExecution)
                 {
                     asyncReceive.Cancel();
-                    continue; // if the execution is over, the message may not be valid and should be ignored.
+                    // We need to wait for the asyncReceive cancellation because the completion of this thread will close MPI but we need to make sure the cancel is over by then.
+                    asyncReceive.Wait();
+
+                    break; // if the execution is over, the message may not be valid and should be ignored.
                 }
 
                 messageQueue.Add((Message)asyncReceive.GetValue());
             }
 
+            // Signal the main MapManager thread that this thread is correctly closed and we won't receive any other messages
             messageQueue.CompleteAdding();
-        }
-
-        /// <summary>
-        /// Initialize ActorProcess lists for rats and cats
-        /// </summary>
-        private void InitActorProcesses()
-        {
-            int count = 0;
-            rats = map.Rats.Select(t => new ActorProcess
-            {
-                Rank = ++count,
-                IsDeadProcess = false,
-                Position = t.Position,
-                Playing = true
-            }).ToArray();
-
-            cats = map.Cats.Select(t => new ActorProcess
-            {
-                Rank = ++count,
-                IsDeadProcess = false,
-                Position = t.Position,
-                Playing = true
-            }).ToArray();
-        }
-
-        /// <summary>
-        /// Broadcast a message to all actors as if the message was directly aimed at them
-        /// </summary>
-        /// <param name="message"></param>
-        private void Broadcast(Message message)
-        {
-            lock (comm)
-            {
-                foreach (ActorProcess actor in cats)
-                {
-                    comm.Send(message, actor.Rank, 0);
-                }
-                foreach (ActorProcess actor in rats)
-                {
-                    comm.Send(message, actor.Rank, 0);
-                }
-            }
         }
 
         public void Start()
@@ -149,17 +139,14 @@ namespace Rongeurville
             // Start the task that listens to incomming messages and queue them
             messageListenerTask.Start();
 
-            // Send map to everyone and start the game
-            StartSignal startSignal = new StartSignal { Map = map };
-            lock (comm)
-            {
-                comm.Broadcast(ref startSignal, 0);
-            }
+            // Send map and their respective position to everyone and start the game
+            SignalGameStartToAllActors();
 
             while (true)
             {
                 try
                 {
+                    // Waits for the next message to arrive
                     Communication.Request request = messageQueue.Take() as Communication.Request;
                     if (request != null)
                     {
@@ -168,12 +155,43 @@ namespace Rongeurville
                 }
                 catch (InvalidOperationException e)
                 {
-                    break; // No more message to receive, get out of the infinite while loop
+                    break; // No more message to receive and the task receiving messages is finished, get out of the infinite while loop
                 }
             }
 
             stopwatch.Stop();
             logger.LogExecutionTime((int)stopwatch.ElapsedMilliseconds, map.Rats.Count == 0 ? ProcessType.Cat : ProcessType.Rat);
+        }
+
+        /// <summary>
+        /// Informs every other processes that the game started and provides the map and position informations
+        /// </summary>
+        private void SignalGameStartToAllActors()
+        {
+            StartSignal startSignal = new StartSignal { Map = map };
+            lock (comm)
+            {
+                foreach (ActorProcess actor in actors)
+                {
+                    startSignal.Position = actor.Position;
+                    comm.Send(startSignal, actor.Rank, 0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ends the current game by blocking every processes from playing and signaling them to stop
+        /// </summary>
+        private void EndGame()
+        {
+            // Stops all actors from playing
+            foreach (ActorProcess actor in actors)
+            {
+                actor.Playing = false;
+            }
+
+            // Signal to everyone that the game is over and they should stop.
+            Broadcast(new KillSignal());
         }
 
         /// <summary>
@@ -197,7 +215,7 @@ namespace Rongeurville
             // This is meant to deny requests that were sent in between the moment the actor was removed from the game and the moment the actor learned about it.
             if (!sender.Playing)
             {
-                return; // Ignore the message, the process is no longer playing
+                return; // Ignore the request, the process is no longer playing
             }
 
             // Move request
@@ -275,35 +293,6 @@ namespace Rongeurville
         }
 
         /// <summary>
-        /// Ends the current game by blocking every processes from playing and signaling them to stop
-        /// </summary>
-        private void EndGame()
-        {
-            // Stops all actors from playing
-            foreach (ActorProcess rat in rats)
-            {
-                rat.Playing = false;
-            }
-            foreach (ActorProcess cat in cats)
-            {
-                cat.Playing = false;
-            }
-
-            // Signal to everyone that the game is over and they should stop.
-            KillSignal killSignal = new KillSignal();
-            Broadcast(killSignal);
-        }
-
-        /// <summary>
-        /// Check if the game is over (cat or rat win)
-        /// </summary>
-        /// <returns></returns>
-        private bool IsGameOver()
-        {
-            return map.Cheese.Count == 0 || map.Rats.Count == 0;
-        }
-
-        /// <summary>
         /// Remove rat from playing actors and signal him that he died.
         /// </summary>
         /// <param name="rat"></param>
@@ -327,8 +316,7 @@ namespace Rongeurville
         private void HandleMeow(MeowRequest meowRequest, ActorProcess sender)
         {
             logger.LogMeow(sender.Rank, sender.Position);
-            MeowSignal meowSignal = new MeowSignal { MeowLocation = sender.Position };
-            Broadcast(meowSignal);
+            Broadcast(new MeowSignal { MeowLocation = sender.Position });
         }
 
         /// <summary>
@@ -338,14 +326,22 @@ namespace Rongeurville
         /// <param name="sender"></param>
         private void HandleDeath(DeathConfirmation deathConfirmation, ActorProcess sender)
         {
-            ActorProcess dyingActorProcess = GetActorProcessByRank(deathConfirmation.Rank);
-            dyingActorProcess.IsDeadProcess = true;
+            GetActorProcessByRank(deathConfirmation.Rank).IsDeadProcess = true;
             
             if (AreAllActorsFinished())
             {
-                // Stop the MapManager reception of messages
+                // Stop the MapManager reception of messages if all actor's processes are dead
                 ContinueExecution = false;
             }
+        }
+
+        /// <summary>
+        /// Check if the game is over (cat or rat win)
+        /// </summary>
+        /// <returns></returns>
+        private bool IsGameOver()
+        {
+            return map.Cheese.Count == 0 || map.Rats.Count == 0;
         }
 
         /// <summary>
@@ -354,7 +350,7 @@ namespace Rongeurville
         /// <returns></returns>
         private bool AreAllActorsFinished()
         {
-            return !(rats.Any(rat => !rat.IsDeadProcess) || cats.Any(cat => !cat.IsDeadProcess));
+            return actors.All(a => a.IsDeadProcess);
         }
 
         /// <summary>
@@ -364,7 +360,7 @@ namespace Rongeurville
         /// <returns></returns>
         private ActorProcess GetActorProcessByRank(int rank)
         {
-            return cats.FirstOrDefault(c => c.Rank == rank) ?? rats.FirstOrDefault(r => r.Rank == rank);
+            return actors[rank - 1];
         }
 
         /// <summary>
@@ -374,7 +370,22 @@ namespace Rongeurville
         /// <returns></returns>
         private ActorProcess GetActorProcessByCoordinates(Coordinates position)
         {
-            return cats.FirstOrDefault(c => c.Position.Equals(position)) ?? rats.FirstOrDefault(r => r.Position.Equals(position));
+            return actors.FirstOrDefault(a => a.Position.Equals(position));
+        }
+
+        /// <summary>
+        /// Broadcast a message to all actors as if the message was directly sent at them
+        /// </summary>
+        /// <param name="message"></param>
+        private void Broadcast(Message message)
+        {
+            lock (comm)
+            {
+                foreach (ActorProcess actor in actors)
+                {
+                    comm.Send(message, actor.Rank, 0);
+                }
+            }
         }
     }
 }

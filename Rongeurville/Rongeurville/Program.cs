@@ -24,28 +24,27 @@ namespace Rongeurville
                 int nbrCats = Int32.Parse(args[2]);
 
                 if (nbrRats + nbrCats + 1 != comm.Size)
-                    throw new ArgumentException("The total nuumber of actors (rats + cats + map) must be equal to the number of processes");
-                
-                if (comm.Rank == 0) // Master
+                    throw new ArgumentException("The total number of actors (rats + cats + map) must be equal to the number of processes");
+
+                ActorsDivider divider = new ActorsDivider(nbrRats, nbrCats);
+
+                switch (divider.GetProcesTypeByRank(comm.Rank))
                 {
-                    Console.WriteLine("Creating Map ... from rank {0}", comm.Rank);
-                    new MapManager(comm, mapFilePath, nbrRats, nbrCats).Start();
-                    Console.WriteLine("~ Closing Map ... from rank {0}", comm.Rank);
-                }
-                else // Slave
-                {
-                    if (comm.Rank > 0 && comm.Rank <= nbrRats)
-                    {
+                    case ProcessType.Map:
+                        Console.WriteLine("Creating Map ... from rank {0}", comm.Rank);
+                        new MapManager(comm, mapFilePath, divider).Start();
+                        Console.WriteLine("~ Closing Map ... from rank {0}", comm.Rank);
+                        break;
+                    case ProcessType.Rat:
                         Console.WriteLine("Creating Rat ... from rank {0}", comm.Rank);
                         new Rat(comm).Start();
                         Console.WriteLine("~ Closing Rat ... from rank {0}", comm.Rank);
-                    }
-                    else if (comm.Rank > nbrRats && comm.Rank <= comm.Size)
-                    {
+                        break;
+                    case ProcessType.Cat:
                         Console.WriteLine("Creating Cat ... from rank {0}", comm.Rank);
                         new Cat(comm).Start();
                         Console.WriteLine("~ Closing Cat ... from rank {0}", comm.Rank);
-                    }
+                        break;
                 }
             }
         }

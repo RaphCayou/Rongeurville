@@ -27,11 +27,6 @@ namespace Rongeurville
             Exits = new List<Tile>();
         }
 
-        public Tile GetTileByCoordinates(Coordinates position)
-        {
-            return Tiles[position.Y, position.X];
-        }
-
         private bool ValidateDestinationTile(Coordinates source, Coordinates destination)
         {
             if (!(0 <= destination.Y && destination.Y < Height
@@ -70,7 +65,7 @@ namespace Rongeurville
 
             if (sourceTile.Content == TileContent.Cat)
             {
-                if (verticalDistance == horizontalDistance && verticalDistance == 1)
+                if (verticalDistance == 1 && horizontalDistance == 1)
                 {
                     return false; // Cats cannot move in diagonal pattern
                 }
@@ -161,7 +156,7 @@ namespace Rongeurville
             destinationTile.Content = sourceTile.Content;
             sourceTile.Content = TileContent.Empty;
 
-            if (Exits.Any(e => e.Position.Equals(destination)) && destinationTile.Content == TileContent.Rat)
+            if (Exits.Contains(destinationTile) && destinationTile.Content == TileContent.Rat)
             {
                 // A rat reached the exit
                 Rats.RemoveAll(tile => tile.Position.Equals(destination)); // Removes the escaped rat
@@ -169,23 +164,26 @@ namespace Rongeurville
             }
         }
 
-        /// <summary>
-        /// Return the Tile associated with the rank of the process. May be a rat or a cat.
-        /// </summary>
-        /// <param name="rank">Rank of the process</param>
-        /// <returns></returns>
-        public Tile GetCurrentTileByRank(int rank)
+        public Tile GetTileByCoordinates(Coordinates position)
         {
-            if (1 <= rank && rank <= Rats.Count)
+            return Tiles[position.Y, position.X];
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < Height; ++i)
             {
-                return Rats[rank - 1];
-            }
-            else if (Rats.Count + 1 <= rank && rank <= Rats.Count + Cats.Count)
-            {
-                return Cats[rank - Rats.Count - 1];
+                for (int j = 0; j < Width; ++j)
+                {
+                    sb.Append(Tiles[i, j].FormattedContent);
+                }
+
+                sb.AppendLine();
             }
 
-            throw new Exception("Rank is not a cat nor a rat.");
+            return sb.ToString();
         }
 
         /// <summary>
@@ -276,21 +274,18 @@ namespace Rongeurville
             }
         }
 
-        public override string ToString()
+        public Tile GetCurrentTileByRank(int rank)
         {
-            StringBuilder sb = new StringBuilder();
-            
-            for (int i = 0; i < Height; ++i)
+            if (1 <= rank && rank <= Rats.Count)
             {
-                for (int j = 0; j < Width; ++j)
-                {
-                    sb.Append(Tiles[i, j].FormattedContent);
-                }
-
-                sb.AppendLine();
+                return Rats[rank - 1];
+            }
+            else if (Rats.Count + 1 <= rank && rank <= Rats.Count + Cats.Count)
+            {
+                return Cats[rank - Rats.Count - 1];
             }
 
-            return sb.ToString();
+            throw new Exception("Rank is not a cat nor a rat.");
         }
     }
 }

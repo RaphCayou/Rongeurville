@@ -51,11 +51,10 @@ namespace Rongeurville
         /// </summary>
         public void Start()
         {
-            StartSignal mapReceived = new StartSignal();
-            comm.Broadcast(ref mapReceived, 0);
+            StartSignal startSignal = comm.Receive<StartSignal>(0, 0);
 
-            map = mapReceived.Map;
-            currentTile = map.GetCurrentTileByRank(rank);
+            map = startSignal.Map;
+            currentTile = map.GetTileByCoordinates(startSignal.Position);
 
             AliveLoop();
         }
