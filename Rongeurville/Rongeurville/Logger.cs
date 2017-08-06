@@ -10,7 +10,7 @@ namespace Rongeurville
         class Pair
         {
             public int NbrAccepted;
-            public int NbrRejected;
+            public int NbrTotal;
         }
         private string filename;
         private Dictionary<int, Pair> moves;
@@ -39,8 +39,8 @@ namespace Rongeurville
             Log("====================================================");
             foreach (var move in moves.OrderBy(m => m.Key))
             {
-                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} request {move.Value.NbrAccepted + move.Value.NbrRejected} moves");
-                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has a proportion of {move.Value.NbrAccepted / (double)(move.Value.NbrAccepted + move.Value.NbrRejected)}/1 accepted moves");
+                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} request {move.Value.NbrAccepted + move.Value.NbrTotal} moves");
+                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has {Math.Round(move.Value.NbrAccepted / (double)move.Value.NbrTotal * 100)}% accepted moves");
             }
             Log($"Total execution time : {ms} ms");
         }
@@ -53,14 +53,13 @@ namespace Rongeurville
 
             if (!moves.ContainsKey(rank))
             {
-                moves.Add(rank, new Pair { NbrAccepted = accepted ? 1 : 0, NbrRejected = accepted ? 0 : 1 });
+                moves.Add(rank, new Pair { NbrAccepted = accepted ? 1 : 0, NbrTotal = 1});
             }
             else
             {
+                moves[rank].NbrTotal++;
                 if (accepted)
                     moves[rank].NbrAccepted++;
-                else
-                    moves[rank].NbrRejected++;
             }
         }
         public void LogCaptureRat(int ratRank, int catRank)
