@@ -30,11 +30,11 @@ namespace Rongeurville
 
         private void Log(string text, bool appendDate = true)
         {
-            File.AppendAllText(filename, $"{(appendDate? $"[{DateTime.Now:HH:mm:ss}] " : "")}{text}{Environment.NewLine}");
+            File.AppendAllText(filename, $"{(appendDate? $"[{DateTime.Now:HH:mm:ss.fff}] " : "")}{text}{Environment.NewLine}");
         }
         public void LogExecutionTime(int ms, ProcessType winner)
         {
-            Log($"The winner(s) are {winner.ToString().ToLower()}(s)");
+            Log($"The winners are {winner.ToString().ToLower()}s");
             Log("====================================================");
             Log("=====================Statistics=====================");
             Log("====================================================");
@@ -50,8 +50,8 @@ namespace Rongeurville
         public void LogMove(int rank, bool accepted, Coordinates from, Coordinates to)
         {
             Log(accepted
-                ? $"[Move Accepted] The {getType(rank)} #{rank} moves from {from} to {to}"
-                : $"[Move Rejected] The {getType(rank)} #{rank} tried to move from {from} to {to}");
+                ? $"[Move Accepted] The {getType(rank).ToString().ToLower()} #{rank} moves from {from} to {to}"
+                : $"[Move Rejected] The {getType(rank).ToString().ToLower()} #{rank} tried to move from {from} to {to}");
 
             if (!actorsMoves.ContainsKey(rank))
             {
