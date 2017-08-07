@@ -13,8 +13,10 @@ using static Rongeurville.Map;
 
 namespace Rongeurville
 {
-    class MapManager
+    public class MapManager
     {
+        private const int MAP_LOG_INTERVAL = 5;
+
         private Intracommunicator comm;
         private Logger logger;
         
@@ -22,6 +24,7 @@ namespace Rongeurville
         private Map map;
         
         private volatile bool ContinueExecution = true;
+        private int moveCount;
         private Task messageListenerTask;
         private BlockingCollection<Message> messageQueue = new BlockingCollection<Message>();
 
@@ -36,6 +39,7 @@ namespace Rongeurville
 
         public MapManager(Intracommunicator comm, string mapFilePath, ActorsDivider divider)
         {
+            moveCount = 0;
             this.comm = comm;
 
             if (!File.Exists(mapFilePath))
@@ -277,9 +281,10 @@ namespace Rongeurville
             {
                 logger.LogMove(sender.Rank, false, sender.Position, moveRequest.DesiredTile);
             }
-
-            // TODO Delete this and replace it by a timer or something like this
-            logger.LogMap(map.ToString());
+            
+            if (moveCount % MAP_LOG_INTERVAL == 0)
+                logger.LogMap(map.ToString());
+            moveCount++;
 
             if (IsGameOver())
             {
