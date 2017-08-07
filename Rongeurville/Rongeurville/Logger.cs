@@ -7,20 +7,21 @@ namespace Rongeurville
 {
     public class Logger
     {
-        class Pair
+        class Moves
         {
-            public int NbrAccepted;
-            public int NbrTotal;
+            public int NbAcceptedMoves;
+            public int NbTotalMoves;
         }
+
         private string filename;
-        private Dictionary<int, Pair> moves;
+        private Dictionary<int, Moves> actorsMoves;
         private Func<int, ProcessType> getType;
 
         public Logger(Func<int, ProcessType> getType, string filename = "Log.txt")
         {
             this.getType = getType;
             this.filename = filename;
-            moves = new Dictionary<int, Pair>();
+            actorsMoves = new Dictionary<int, Moves>();
 
             // Clean the log file
             if (File.Exists(filename))
@@ -37,29 +38,30 @@ namespace Rongeurville
             Log("====================================================");
             Log("=====================Statistics=====================");
             Log("====================================================");
-            foreach (var move in moves.OrderBy(m => m.Key))
+
+            foreach (var move in actorsMoves.OrderBy(m => m.Key))
             {
-                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} request {move.Value.NbrAccepted + move.Value.NbrTotal} moves");
-                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has {Math.Round(move.Value.NbrAccepted / (double)move.Value.NbrTotal * 100)}% accepted moves");
+                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} request {move.Value.NbAcceptedMoves + move.Value.NbTotalMoves} moves");
+                Log($"The {getType(move.Key).ToString().ToLower()} #{move.Key} has {Math.Round(move.Value.NbAcceptedMoves / (double)move.Value.NbTotalMoves * 100)}% accepted moves");
             }
+
             Log($"Total execution time : {ms} ms");
         }
         public void LogMove(int rank, bool accepted, Coordinates from, Coordinates to)
         {
-            // TODO Delete this, for debug purpose only
             Log(accepted
                 ? $"[Move Accepted] The {getType(rank)} #{rank} moves from {from} to {to}"
                 : $"[Move Rejected] The {getType(rank)} #{rank} tried to move from {from} to {to}");
 
-            if (!moves.ContainsKey(rank))
+            if (!actorsMoves.ContainsKey(rank))
             {
-                moves.Add(rank, new Pair { NbrAccepted = accepted ? 1 : 0, NbrTotal = 1});
+                actorsMoves.Add(rank, new Moves { NbAcceptedMoves = accepted ? 1 : 0, NbTotalMoves = 1});
             }
             else
             {
-                moves[rank].NbrTotal++;
+                actorsMoves[rank].NbTotalMoves++;
                 if (accepted)
-                    moves[rank].NbrAccepted++;
+                    actorsMoves[rank].NbAcceptedMoves++;
             }
         }
         public void LogCaptureRat(int ratRank, int catRank)
