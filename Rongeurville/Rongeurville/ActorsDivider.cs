@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rongeurville
 {
-    class ActorsDivider
+    public class ActorsDivider
     {
         public int NumberOfRats { get; }
         public int NumberOfCats { get; }
