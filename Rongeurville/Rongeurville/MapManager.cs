@@ -61,6 +61,7 @@ namespace Rongeurville
 
             // Initialize the message listener task
             messageListenerTask = new Task(ReceiveMessages);
+            logger.LogMap(map.ToString());
         }
 
         /// <summary>
@@ -164,6 +165,7 @@ namespace Rongeurville
             }
 
             stopwatch.Stop();
+            logger.LogMap(map.ToString());
             logger.LogExecutionTime((int)stopwatch.ElapsedMilliseconds, map.Rats.Count == 0 ? ProcessType.Cat : ProcessType.Rat);
         }
 
@@ -281,10 +283,10 @@ namespace Rongeurville
             {
                 logger.LogMove(sender.Rank, false, sender.Position, moveRequest.DesiredTile);
             }
-            
+
+            moveCount++;
             if (moveCount % MAP_LOG_INTERVAL == 0)
                 logger.LogMap(map.ToString());
-            moveCount++;
 
             if (IsGameOver())
             {
