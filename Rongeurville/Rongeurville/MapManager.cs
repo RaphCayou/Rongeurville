@@ -153,7 +153,7 @@ namespace Rongeurville
                         HandleRequest(request);
                     }
                 }
-                catch (InvalidOperationException e)
+                catch (InvalidOperationException)
                 {
                     break; // No more message to receive and the task receiving messages is finished, get out of the infinite while loop
                 }
